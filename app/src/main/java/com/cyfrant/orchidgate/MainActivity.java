@@ -24,8 +24,10 @@ import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.service.ProxyManager;
 import com.demo.ApplicationProperties;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends Activity implements ProxyStatusCallback {
-    private static final String URL_TELEGRAM_INSTALL = "https://play.google.com/store/apps/details?id=org.telegram.messenger";
+    private static final DecimalFormat secondFormat = new DecimalFormat("#0.0");
     private static final String PACKAGE_TELEGRAM = "org.telegram.messenger";
     private static final String PACKAGE_TELEGRAMX = "org.thunderdog.challegram";
     private static final int COLOR_LIGHT_GREEN = Color.parseColor("#FFD4FFBF");
@@ -134,14 +136,14 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
     }
 
     @Override
-    public void onHearbeat(final long delayUp, final long delayDown, final String exitAddress) {
+    public void onHeartbeat(final double delayUp, final double delayDown, final String exitAddress) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                long secUp = Math.round(delayUp/1000);
-                long secDown = Math.round(delayDown/1000);
-                heartbeatStatus.setText(exitAddress + ": ⬆" + secUp + " sec  ⬇" +secDown + " sec");
-                setHeartbeatBackground(secUp + secDown);
+                heartbeatStatus.setText(exitAddress
+                        + ": ⬆" + secondFormat.format(delayUp)
+                        + " sec  ⬇" + secondFormat.format(delayDown) + " sec");
+                setHeartbeatBackground(delayDown + delayUp);
             }
         });
     }
@@ -156,7 +158,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         syncLinkButton();
     }
 
-    private void setHeartbeatBackground(long rtt) {
+    private void setHeartbeatBackground(double rtt) {
         if (rtt < 3){
             heartbeatStatus.setBackgroundColor(COLOR_LIGHT_GREEN);
             return;

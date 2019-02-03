@@ -39,6 +39,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         ProxyService svc = mConnection.getService();
         if (svc != null) {
             svc.shutdown();
+            doUnbindService();
         }
 
         if (isProxyRunning()) {
@@ -105,12 +106,12 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     }
 
     @Override
-    public void onHearbeat(final long delayUp, final long delayDown, final String exitAddress) {
+    public void onHeartbeat(final double delayUp, final double delayDown, final String exitAddress) {
         for (final ProxyStatusCallback observer : observers) {
             Background.threadPool().submit(new Runnable() {
                 @Override
                 public void run() {
-                    observer.onHearbeat(delayUp, delayDown, exitAddress);
+                    observer.onHeartbeat(delayUp, delayDown, exitAddress);
                 }
             });
         }

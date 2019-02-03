@@ -111,9 +111,9 @@ public class ProxyManager implements Proxy {
             public void run() {
                 ExitNode node = ExitNode.probe(client);
                 if (callback != null && node != null){
-                    callback.onHearbeat(
-                            Math.round(node.getUplinkDelay()/1000),
-                            Math.round(node.getDownlinkDelay()/1000),
+                    callback.onHeartbeat(
+                            node.getUplinkDelay()/1000.0d,
+                            node.getDownlinkDelay()/1000.0d,
                             node.getAddress()
                     );
                 }

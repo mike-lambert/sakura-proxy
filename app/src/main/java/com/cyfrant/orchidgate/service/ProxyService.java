@@ -14,18 +14,14 @@ import com.cyfrant.orchidgate.R;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 
-public class ProxyService extends Service {
-    public static int REQUEST_NOTIFICATION_PROXY = 0x00003128;
+import java.text.DecimalFormat;
+
+public class ProxyService extends Service implements ProxyStatusCallback {
+    public static int REQUEST_NOTIFICATION_PROXY = 1;
+    private static final DecimalFormat secondFormat = new DecimalFormat("#0.0");
     private ProxyManager proxyManager;
     private ProxyStatusCallback callback;
     private IBinder binder;
-    private Notification ongoing;
-
-    public void shutdown() {
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.cancel(REQUEST_NOTIFICATION_PROXY);
-        stopSelf();
-    }
 
     public class LocalBinder extends Binder {
         ProxyService getService() {
@@ -37,11 +33,13 @@ public class ProxyService extends Service {
         private ProxyManager manager;
         private ProxyService service;
         private ProxyStatusCallback callback;
+        private ProxyApplication application;
 
         public ProxyServiceConnection(ProxyManager manager, ProxyApplication application) {
             this.manager = manager;
             if (this.callback == null && application != null){
                 this.callback = application;
+                this.application = application;
             }
 
         }
@@ -56,6 +54,7 @@ public class ProxyService extends Service {
             this.service = ((ProxyService.LocalBinder) service).getService();
             this.service.proxyManager = manager;
             this.service.callback = callback;
+            this.application.addProxyObserver(this.service);
             this.service.startProxyManager();
         }
 
@@ -65,6 +64,7 @@ public class ProxyService extends Service {
             // crashed. Because it is running in our same process, we
             // should never see this happen.
             this.service.stopProxyManager();
+            this.application.removeProxyObserver(this.service);
             this.service = null;
         }
 
@@ -91,23 +91,28 @@ public class ProxyService extends Service {
         if (intent != null && intent.getAction() != null
                 && intent.getAction().equals("stop")) {
             // User clicked the notification. Need to stop the service.
-            stopProxyManager();
+            ((ProxyApplication)getApplication()).stopProxyService();
         } else {
             // Service starting. Create a notification.
-            Notification notification = new Notification.Builder(this)
-
-                    .setSmallIcon(R.drawable.sakura)
-                    .setContentTitle("Sakura proxy running")
-                    .setWhen(System.currentTimeMillis())
-                    .setContentIntent(PendingIntent.getService(this, REQUEST_NOTIFICATION_PROXY, new Intent(
-                            "stop", null, this, this.getClass()), 0))
-                    .build();
-
-            notification.flags |= Notification.FLAG_ONGOING_EVENT;
-            nm.notify(REQUEST_NOTIFICATION_PROXY, notification);
-            ongoing = notification;
+            startForeground(REQUEST_NOTIFICATION_PROXY, createNotification("Starting proxy ..."));
         }
         return result;
+    }
+
+    private Notification createNotification(String text) {
+        Notification notification = new Notification.Builder(this)
+
+                .setSmallIcon(R.drawable.sakura)
+                .setContentTitle(getString(R.string.service_name))
+                .setContentText(text)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(PendingIntent.getService(this, REQUEST_NOTIFICATION_PROXY,
+                        new Intent("stop", null, this, this.getClass()), 0)
+                )
+                .build();
+
+        notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        return notification;
     }
 
     private void startProxyManager() {
@@ -119,10 +124,45 @@ public class ProxyService extends Service {
     }
 
     public void updateNotification(String text) {
-        // TODO: implement
+        ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
+                .notify(REQUEST_NOTIFICATION_PROXY, createNotification(text));
     }
 
     public static ProxyServiceConnection createConnection(ProxyManager manager, ProxyApplication application) {
         return new ProxyServiceConnection(manager, application);
+    }
+
+    public void shutdown() {
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nm.cancel(REQUEST_NOTIFICATION_PROXY);
+        stopProxyManager();
+        stopSelf();
+    }
+
+    @Override
+    public void onStartup(int percentage, String message) {
+        updateNotification(percentage + "% : " + message);
+    }
+
+    @Override
+    public void onStarted(int port) {
+        updateNotification("Listening on 127.0.0.1:" + port);
+    }
+
+    @Override
+    public void onStopped(String cause) {
+        //updateNotification("Listening on 127.0.0.1:" + port);
+    }
+
+    @Override
+    public void onHeartbeat(double delayUp, double delayDown, String exitAddress) {
+        updateNotification(exitAddress
+                + ": ⬆" + secondFormat.format(delayUp)
+                + " sec  ⬇" + secondFormat.format(delayDown) + " sec");
+    }
+
+    @Override
+    public void onTorBootstrapFailed(String message) {
+        updateNotification(message);
     }
 }

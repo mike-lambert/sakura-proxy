@@ -1,15 +1,29 @@
 package com.cyfrant.orchidgate.service.heartbeat;
 
+import com.demo.ApplicationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.ByteStreams;
 import com.subgraph.orchid.TorClient;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.HttpsURLConnection;
+
+import okhttp3.ConnectionSpec;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.TlsVersion;
 
 public class ExitNode {
     private String address;
@@ -45,13 +59,14 @@ public class ExitNode {
             ObjectMapper json = new ObjectMapper();
             Ping ping = new Ping();
             String pingJson = json.writeValueAsString(ping);
-            ping = json.readValue(postJson("https://cyfrant.com/ping/v1/rtt", pingJson, client), Ping.class);
+            String responseJson = postJson("https://cyfrant.com/ping/v1/rtt", pingJson, client);
             long received = System.currentTimeMillis();
-            String ip2 = ping.getClientAddress();
-            long up = Math.abs(ping.getServerReceived() - ping.getClientSent());
-            long down = Math.abs(received - ping.getServerReturned());
+            Ping response = json.readValue(responseJson, Ping.class);
+            long down = Math.abs(received - response.getServerReturned());
+            long up = Math.abs(response.getServerReceived() - response.getClientSent());
+            String ip  = response.getClientAddress();
             ExitNode result = new ExitNode();
-            result.setAddress(ip2);
+            result.setAddress(ip);
             result.setUplinkDelay(up);
             result.setDownlinkDelay(down);
             return result;
@@ -60,15 +75,7 @@ public class ExitNode {
         }
     }
 
-    public static OkHttpClient createTorWebClient(TorClient client) {
-        return new OkHttpClient.Builder()
-                .socketFactory(client.getSocketFactory())
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
-    }
-
+    /*
     public static String get(String url, TorClient client) {
         try {
             return createTorWebClient(client).newCall(
@@ -80,20 +87,28 @@ public class ExitNode {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     public static String postJson(String url, String json, TorClient client){
+        HttpURLConnection connection = null;
         try {
-            return createTorWebClient(client).newCall(
-                    new Request.Builder()
-                            .url(url)
-                            .post(
-                                    RequestBody.create(MediaType.parse("application/json"), json)
-                            )
-                            .build()
-            ).execute().body().string();
+            connection = (HttpURLConnection) new URL(url).openConnection(new Proxy(
+                    Proxy.Type.SOCKS,
+                    new InetSocketAddress("127.0.0.1", client.getPrimarySocksPort())
+            ));
+            connection.setDoOutput(true);
+            connection.setChunkedStreamingMode(0);
+            connection.setRequestProperty("Content-Type", "application/json");
+            OutputStream post = connection.getOutputStream();
+            post.write(json.getBytes());
+            post.flush();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteStreams.copy(connection.getInputStream(), out);
+            return new String(out.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+
         }
     }
 }
