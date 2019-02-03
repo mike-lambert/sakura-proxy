@@ -3,6 +3,7 @@ package com.cyfrant.orchidgate;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -10,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -51,7 +53,18 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         coreVersion = findViewById(R.id.textCoreVersion);
-        coreVersion.setText("Router core: " + ApplicationProperties.getName() + "-" + ApplicationProperties.getVersion());
+        coreVersion.setText(
+                "App version : " +
+                        (getPackageInfo(getPackageName()) != null ?
+                                getPackageInfo(getPackageName()).versionName :
+                                "<unknown>"
+                        ) +
+                  "\r\nRouter core : "
+                + ApplicationProperties.getName()
+                + "-" + ApplicationProperties.getVersion()
+                + "\r\nOS          : " + Build.VERSION.RELEASE
+                + "\r\nSDK         : " + Build.VERSION.SDK_INT
+        );
         enableSwitch = findViewById(R.id.switchEnableProxy);
         linkButton = findViewById(R.id.buttonTelegramLink);
         bootProgress = findViewById(R.id.progressBoot);
@@ -282,5 +295,13 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
                 heartbeatStatus.setBackgroundColor(COLOR_LIGHT_RED);
             }
         });
+    }
+
+    private PackageInfo getPackageInfo(String packageName) {
+        try {
+            return getPackageManager().getPackageInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
     }
 }

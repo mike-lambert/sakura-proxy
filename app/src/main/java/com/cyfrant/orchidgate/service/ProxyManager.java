@@ -9,11 +9,8 @@ import com.subgraph.orchid.TorClient;
 import com.subgraph.orchid.TorInitializationListener;
 
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
-
-import okhttp3.OkHttpClient;
 
 public class ProxyManager implements Proxy {
     public static final int PROXY_SOCKS5_PORT = 3128;
@@ -132,15 +129,6 @@ public class ProxyManager implements Proxy {
     }
 
     @Override
-    public OkHttpClient getWebClient() {
-        return client == null ? null :
-                new OkHttpClient.Builder()
-                        .socketFactory(getSocketFactory())
-                        .connectTimeout(30, TimeUnit.SECONDS)
-                        .build();
-    }
-
-    @Override
     public void proxyStart(ProxyStatusCallback callback) {
         this.callback = callback;
         startRouter();
@@ -149,6 +137,13 @@ public class ProxyManager implements Proxy {
     @Override
     public void proxyStop() {
         stopRouter();
+    }
+
+    @Override
+    public void keepAlive() {
+        if (client != null) {
+            performHeartbeat();
+        }
     }
 
     public static String makeTelegramLink(int socksPort) {

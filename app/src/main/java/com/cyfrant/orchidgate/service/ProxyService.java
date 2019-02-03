@@ -1,5 +1,6 @@
 package com.cyfrant.orchidgate.service;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,20 +9,25 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 
 import com.cyfrant.orchidgate.R;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
+import com.cyfrant.orchidgate.service.receivers.AlarmBroadcastReceiver;
 
 import java.text.DecimalFormat;
 
 public class ProxyService extends Service implements ProxyStatusCallback {
     public static int REQUEST_NOTIFICATION_PROXY = 1;
+
     private static final DecimalFormat secondFormat = new DecimalFormat("#0.0");
     private ProxyManager proxyManager;
     private ProxyStatusCallback callback;
     private IBinder binder;
+    private PowerManager.WakeLock wakeLock;
 
     public class LocalBinder extends Binder {
         ProxyService getService() {
@@ -94,9 +100,22 @@ public class ProxyService extends Service implements ProxyStatusCallback {
             ((ProxyApplication)getApplication()).stopProxyService();
         } else {
             // Service starting. Create a notification.
-            startForeground(REQUEST_NOTIFICATION_PROXY, createNotification("Starting proxy ..."));
+            startup();
         }
         return result;
+    }
+
+    private void startup() {
+        startForeground(REQUEST_NOTIFICATION_PROXY, createNotification("Starting proxy ..."));
+        if (wakeLock != null){
+            wakeLock.release();
+            wakeLock = null;
+        }
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                "Sakura:WakeLock");
+        wakeLock.acquire();
+        ((ProxyApplication)getApplication()).scheduleKeepAliveAlarm();
     }
 
     private Notification createNotification(String text) {
@@ -135,6 +154,10 @@ public class ProxyService extends Service implements ProxyStatusCallback {
     public void shutdown() {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         nm.cancel(REQUEST_NOTIFICATION_PROXY);
+        if (wakeLock != null){
+            wakeLock.release();
+            wakeLock = null;
+        }
         stopProxyManager();
         stopSelf();
     }

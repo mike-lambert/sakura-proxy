@@ -1,6 +1,5 @@
 package com.cyfrant.orchidgate.service.heartbeat;
 
-import com.demo.ApplicationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
 import com.subgraph.orchid.TorClient;
@@ -12,18 +11,6 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import okhttp3.ConnectionSpec;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.TlsVersion;
 
 public class ExitNode {
     private String address;

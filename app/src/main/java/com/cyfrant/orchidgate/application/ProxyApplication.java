@@ -1,8 +1,11 @@
 package com.cyfrant.orchidgate.application;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyController;
@@ -10,12 +13,16 @@ import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.service.Background;
 import com.cyfrant.orchidgate.service.ProxyManager;
 import com.cyfrant.orchidgate.service.ProxyService;
+import com.cyfrant.orchidgate.service.heartbeat.ExitNode;
+import com.cyfrant.orchidgate.service.heartbeat.Ping;
+import com.cyfrant.orchidgate.service.receivers.AlarmBroadcastReceiver;
 import com.subgraph.orchid.Tor;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ProxyApplication extends Application implements ProxyController, ProxyStatusCallback {
+    public static int REQUEST_RECEIVER = 2;
     private ProxyManager proxyManager;
     private List<ProxyStatusCallback> observers;
     protected boolean mIsBound;
@@ -50,6 +57,13 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     @Override
     public Proxy getProxy() {
         return proxyManager;
+    }
+
+    @Override
+    public void keepAlive() {
+        if (isProxyRunning()){
+            proxyManager.keepAlive();
+        }
     }
 
     // Application
@@ -176,6 +190,21 @@ public class ProxyApplication extends Application implements ProxyController, Pr
                     observer.onTorBootstrapFailed(message);
                 }
             });
+        }
+    }
+
+    public void scheduleKeepAliveAlarm() {
+        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmBroadcastReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (Build.VERSION.SDK_INT >= 23) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
+        }
+        else if (Build.VERSION.SDK_INT >= 19) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
+        }
+        else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
         }
     }
 }
