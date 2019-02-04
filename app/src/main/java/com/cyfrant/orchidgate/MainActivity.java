@@ -10,9 +10,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -44,8 +47,8 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
     private TextView coreVersion;
     private int port;
 
-    protected ProxyApplication getProxyApplication(){
-        return (ProxyApplication)getApplication();
+    protected ProxyApplication getProxyApplication() {
+        return (ProxyApplication) getApplication();
     }
 
     @Override
@@ -59,11 +62,12 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
                                 getPackageInfo(getPackageName()).versionName :
                                 "<unknown>"
                         ) +
-                  "\r\nRouter core : "
-                + ApplicationProperties.getName()
-                + "-" + ApplicationProperties.getVersion()
-                + "\r\nOS          : " + Build.VERSION.RELEASE
-                + "\r\nSDK         : " + Build.VERSION.SDK_INT
+                        "\r\nRouter core : "
+                        + ApplicationProperties.getName()
+                        + "-" + ApplicationProperties.getVersion()
+                        + "\r\nOS          : " + Build.VERSION.RELEASE
+                        + "\r\nSDK         : " + Build.VERSION.SDK_INT
+                        + "\r\nDevice      : " + Build.MANUFACTURER + " " + Build.MODEL
         );
         enableSwitch = findViewById(R.id.switchEnableProxy);
         linkButton = findViewById(R.id.buttonTelegramLink);
@@ -73,8 +77,10 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         enableSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
+                if (isChecked) {
                     getProxyApplication().getProxyController().startProxyService();
+                    heartbeatStatus.setText("");
+                    heartbeatStatus.setBackgroundColor(Color.WHITE);
                 } else {
                     getProxyApplication().getProxyController().stopProxyService();
                     linkButton.setVisibility(View.GONE);
@@ -90,6 +96,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         super.onResume();
         getProxyApplication().addProxyObserver(this);
         syncState(getProxyApplication().isProxyRunning());
+        checkWhitelisting();
     }
 
     @Override
@@ -161,7 +168,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         });
     }
 
-    private void syncState(boolean running){
+    private void syncState(boolean running) {
         enableSwitch.setChecked(running);
         linkButton.setVisibility(running ? View.VISIBLE : View.GONE);
         heartbeatStatus.setVisibility(View.VISIBLE);
@@ -172,12 +179,12 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
     }
 
     private void setHeartbeatBackground(double rtt) {
-        if (rtt < 3){
+        if (rtt < 3) {
             heartbeatStatus.setBackgroundColor(COLOR_LIGHT_GREEN);
             return;
         }
 
-        if (rtt < 8){
+        if (rtt < 8) {
             heartbeatStatus.setBackgroundColor(COLOR_LIGHT_YELLOW);
             return;
         }
@@ -190,7 +197,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         Drawable telegramx = getAppInfo(PACKAGE_TELEGRAMX);
         linkButton.setCompoundDrawables(getLinkIcon(), null, null, null);
 
-        if (telegram == null && telegramx == null){
+        if (telegram == null && telegramx == null) {
             linkButton.setText(R.string.label_button_install);
             linkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -206,7 +213,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
             @Override
             public void onClick(View v) {
                 Proxy proxy = getProxyApplication().getProxy();
-                if (proxy == null){
+                if (proxy == null) {
                     return;
                 }
                 launchProxyScheme(ProxyManager.makeTelegramLink(proxy.getProxyPort()));
@@ -215,7 +222,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
     }
 
     private Drawable getLinkIcon() {
-        Drawable defaultIcon =  scaleDrawable(getDrawable(R.drawable.google_play), 48);
+        Drawable defaultIcon = scaleDrawable(getDrawable(R.drawable.google_play), 48);
         defaultIcon.setBounds(0, 0, 48, 48);
 
         Drawable tgx = getApplicationIcon(PACKAGE_TELEGRAMX);
@@ -224,7 +231,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
             return defaultIcon;
         }
 
-        if (tgx != null){
+        if (tgx != null) {
             Drawable scaledTgx = scaleDrawable(tgx, 48);
             scaledTgx.setBounds(0, 0, 48, 48);
             return scaledTgx;
@@ -238,11 +245,11 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         return defaultIcon;
     }
 
-    private Drawable getAppInfo(String packageName){
+    private Drawable getAppInfo(String packageName) {
         try {
-            return  getPackageManager().getApplicationIcon(packageName);
+            return getPackageManager().getApplicationIcon(packageName);
         } catch (PackageManager.NameNotFoundException e) {
-           return null;
+            return null;
         }
     }
 
@@ -260,9 +267,9 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         return d;
     }
 
-    public static Bitmap drawableToBitmap (Drawable drawable) {
+    public static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable)drawable).getBitmap();
+            return ((BitmapDrawable) drawable).getBitmap();
         }
 
         int width = drawable.getIntrinsicWidth();
@@ -302,6 +309,32 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
             return getPackageManager().getPackageInfo(packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
+        }
+    }
+
+    private void checkWhitelisting() {
+        final String packageName = getPackageName();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent intent = new Intent();
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setData(Uri.parse("package:" + packageName));
+                startActivity(intent);
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Intent intent = new Intent();
+            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            if (connMgr.getRestrictBackgroundStatus() == ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED) {
+                intent.setAction(Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setData(Uri.parse("package:" + packageName));
+                startActivity(intent);
+            }
+
         }
     }
 }

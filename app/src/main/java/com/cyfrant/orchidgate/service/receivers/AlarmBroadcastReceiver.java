@@ -8,20 +8,25 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 
 public class AlarmBroadcastReceiver extends WakefulBroadcastReceiver {
+    private PowerManager.WakeLock screenWakeLock = null;
     @Override
     public void onReceive(Context context, Intent intent) {
-        PowerManager.WakeLock screenWakeLock = null;
         ProxyApplication app = ((ProxyApplication) context.getApplicationContext());
         if (screenWakeLock == null) {
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            screenWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            screenWakeLock = pm.newWakeLock(
+                    PowerManager.SCREEN_DIM_WAKE_LOCK |
+                            PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                            PowerManager.ON_AFTER_RELEASE,
                     "Sakura:Receiver");
-            screenWakeLock.acquire();
+            screenWakeLock.setReferenceCounted(false);
         }
+        screenWakeLock.acquire();
         app.keepAlive();
         if (app.isProxyRunning()){
             app.scheduleKeepAliveAlarm();
         }
+
         if (screenWakeLock != null){
             screenWakeLock.release();
             screenWakeLock = null;

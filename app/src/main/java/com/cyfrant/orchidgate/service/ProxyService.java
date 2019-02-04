@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -28,6 +29,7 @@ public class ProxyService extends Service implements ProxyStatusCallback {
     private ProxyStatusCallback callback;
     private IBinder binder;
     private PowerManager.WakeLock wakeLock;
+    private WifiManager.WifiLock wifiLock;
 
     public class LocalBinder extends Binder {
         ProxyService getService() {
@@ -112,9 +114,24 @@ public class ProxyService extends Service implements ProxyStatusCallback {
             wakeLock = null;
         }
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+        wakeLock = powerManager.newWakeLock(
+                PowerManager.SCREEN_DIM_WAKE_LOCK |
+                        PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                        PowerManager.ON_AFTER_RELEASE,
                 "Sakura:WakeLock");
+        wakeLock.setReferenceCounted(false);
         wakeLock.acquire();
+        WifiManager wifiManager = (WifiManager)getApplicationContext().getSystemService(WIFI_SERVICE);
+
+        if( wifiLock == null ){
+            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "Sakura:WiFiLock");
+        }
+        wifiLock.setReferenceCounted(false);
+
+        if( !wifiLock.isHeld() ){
+            wifiLock.acquire();
+        }
+
         ((ProxyApplication)getApplication()).scheduleKeepAliveAlarm();
     }
 
@@ -158,6 +175,10 @@ public class ProxyService extends Service implements ProxyStatusCallback {
             wakeLock.release();
             wakeLock = null;
         }
+        if (wifiLock != null){
+            wifiLock.release();
+            wifiLock = null;
+        }
         stopProxyManager();
         stopSelf();
     }
@@ -179,6 +200,9 @@ public class ProxyService extends Service implements ProxyStatusCallback {
 
     @Override
     public void onHeartbeat(double delayUp, double delayDown, String exitAddress) {
+        if (wakeLock != null){
+            wakeLock.acquire();
+        }
         updateNotification(exitAddress
                 + ": ⬆" + secondFormat.format(delayUp)
                 + " sec  ⬇" + secondFormat.format(delayDown) + " sec");
