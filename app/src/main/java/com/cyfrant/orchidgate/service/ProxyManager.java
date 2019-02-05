@@ -8,7 +8,10 @@ import com.cyfrant.orchidgate.service.heartbeat.ExitNode;
 import com.subgraph.orchid.TorClient;
 import com.subgraph.orchid.TorInitializationListener;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.SocketFactory;
 
@@ -17,12 +20,16 @@ public class ProxyManager implements Proxy {
     private TorClient client = null;
     private ProxyStatusCallback callback = null;
     private Future pingTask = null;
+    private final AtomicBoolean starting = new AtomicBoolean(false);
 
     private void startRouter() {
         if (client != null) {
             return;
         }
-
+        if (starting.get()) {
+            return;
+        }
+        starting.set(true);
         client = new TorClient();
         client.addInitializationListener(new TorInitializationListener() {
             @Override
@@ -41,6 +48,7 @@ public class ProxyManager implements Proxy {
             @Override
             public void initializationCompleted() {
                 Log.i("Tor", "Ready");
+                starting.set(false);
                 Background.threadPool().submit(new Runnable() {
                     @Override
                     public void run() {
@@ -70,12 +78,13 @@ public class ProxyManager implements Proxy {
                 }
                 ProxyManager.this.callback = null;
                 cancelHeartbeat();
+                starting.set(false);
             }
         });
     }
 
-    private void cancelHeartbeat(){
-        if (pingTask != null && !pingTask.isCancelled()){
+    private void cancelHeartbeat() {
+        if (pingTask != null && !pingTask.isCancelled()) {
             pingTask.cancel(true);
             pingTask = null;
         }
@@ -85,10 +94,11 @@ public class ProxyManager implements Proxy {
         cancelHeartbeat();
         pingTask = Background.threadPool().submit(new Runnable() {
             private final Object lock = new Object();
+
             @Override
             public void run() {
-                while (!Thread.currentThread().isInterrupted()){
-                    synchronized (lock){
+                while (!Thread.currentThread().isInterrupted()) {
+                    synchronized (lock) {
                         try {
                             performHeartbeat();
                             lock.wait(15000);
@@ -102,15 +112,15 @@ public class ProxyManager implements Proxy {
         });
     }
 
-    private void performHeartbeat(){
+    private void performHeartbeat() {
         Background.threadPool().submit(new Runnable() {
             @Override
             public void run() {
                 ExitNode node = ExitNode.probe(client);
-                if (callback != null && node != null){
+                if (callback != null && node != null) {
                     callback.onHeartbeat(
-                            node.getUplinkDelay()/1000.0d,
-                            node.getDownlinkDelay()/1000.0d,
+                            node.getUplinkDelay() / 1000.0d,
+                            node.getDownlinkDelay() / 1000.0d,
                             node.getAddress()
                     );
                 }
@@ -143,10 +153,42 @@ public class ProxyManager implements Proxy {
     public void keepAlive() {
         if (client != null) {
             performHeartbeat();
+            portGuard();
         }
     }
 
     public static String makeTelegramLink(int socksPort) {
         return "tg://socks?server=127.0.0.1&port=" + socksPort;
+    }
+
+    public boolean connectProbe() {
+        Socket socket = null;
+        try {
+            socket = new Socket("localhost", client.getPrimarySocksPort());
+            return true;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void portGuard() {
+        Background.threadPool().submit(new Runnable() {
+            @Override
+            public void run() {
+                if (!connectProbe()) {
+                    ProxyStatusCallback cb = callback;
+                    proxyStop();
+                    proxyStart(cb);
+                }
+            }
+        });
     }
 }

@@ -23,7 +23,7 @@ public class AlarmBroadcastReceiver extends WakefulBroadcastReceiver {
         }
         screenWakeLock.acquire();
         app.keepAlive();
-        if (app.isProxyRunning()){
+        if (app.isActive()){
             app.scheduleKeepAliveAlarm();
         }
 

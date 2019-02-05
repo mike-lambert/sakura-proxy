@@ -25,19 +25,21 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     public static int REQUEST_RECEIVER = 2;
     private ProxyManager proxyManager;
     private List<ProxyStatusCallback> observers;
+    private boolean active;
     protected boolean mIsBound;
     protected ProxyService.ProxyServiceConnection mConnection;
 
     // ProxyController
     @Override
     public void startProxyService() {
+        active = true;
         instantiateProxyService();
         proxyManager.proxyStart(this);
     }
 
     @Override
     public boolean isProxyRunning() {
-        return proxyManager != null && proxyManager.getSocketFactory() != null;
+        return proxyManager != null && proxyManager.connectProbe();
     }
 
     @Override
@@ -49,9 +51,10 @@ public class ProxyApplication extends Application implements ProxyController, Pr
             doUnbindService();
         }
 
-        if (isProxyRunning()) {
+        if (isActive()) {
             proxyManager.proxyStop();
         }
+        active = false;
     }
 
     @Override
@@ -61,9 +64,14 @@ public class ProxyApplication extends Application implements ProxyController, Pr
 
     @Override
     public void keepAlive() {
-        if (isProxyRunning()){
+        if (isActive()){
             proxyManager.keepAlive();
         }
+    }
+
+    @Override
+    public boolean isActive() {
+        return active;
     }
 
     // Application

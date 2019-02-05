@@ -6,4 +6,5 @@ public interface ProxyController {
     void stopProxyService();
     Proxy getProxy();
     void keepAlive();
+    boolean isActive();
 }
