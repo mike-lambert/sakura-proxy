@@ -4,7 +4,7 @@ import javax.net.SocketFactory;
 
 public interface Proxy {
     int getProxyPort();
-    SocketFactory getSocketFactory();
+    boolean isStartPending();
     void proxyStart(ProxyStatusCallback callback);
     void proxyStop();
     void keepAlive();

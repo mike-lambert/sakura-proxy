@@ -134,8 +134,8 @@ public class ProxyManager implements Proxy {
     }
 
     @Override
-    public SocketFactory getSocketFactory() {
-        return client == null ? null : client.getSocketFactory();
+    public boolean isStartPending() {
+        return starting.get();
     }
 
     @Override

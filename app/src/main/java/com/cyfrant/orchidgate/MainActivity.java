@@ -94,7 +94,10 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
     protected void onResume() {
         super.onResume();
         getProxyApplication().addProxyObserver(this);
-        syncState(getProxyApplication().isActive());
+        syncState(getProxyApplication().isActive(),
+                getProxyApplication().getProxy() != null &&
+                        getProxyApplication().getProxy().isStartPending()
+        );
         checkWhitelisting();
     }
 
@@ -167,12 +170,12 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
         });
     }
 
-    private void syncState(boolean running) {
+    private void syncState(boolean running, boolean starting) {
         enableSwitch.setChecked(running);
-        linkButton.setVisibility(running ? View.VISIBLE : View.GONE);
+        linkButton.setVisibility(running && !starting ? View.VISIBLE : View.GONE);
         heartbeatStatus.setVisibility(View.VISIBLE);
-        bootStatus.setVisibility(View.GONE);
-        bootProgress.setVisibility(View.GONE);
+        bootStatus.setVisibility(starting ? View.VISIBLE : View.GONE);
+        bootProgress.setVisibility(starting ? View.VISIBLE : View.GONE);
         port = (getProxyApplication().getProxyController().getProxy() != null ? getProxyApplication().getProxyController().getProxy().getProxyPort() : 0);
         syncLinkButton();
     }
