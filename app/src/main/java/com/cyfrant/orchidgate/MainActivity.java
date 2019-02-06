@@ -2,7 +2,6 @@ package com.cyfrant.orchidgate;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -95,7 +94,7 @@ public class MainActivity extends Activity implements ProxyStatusCallback {
     protected void onResume() {
         super.onResume();
         getProxyApplication().addProxyObserver(this);
-        syncState(getProxyApplication().isProxyRunning());
+        syncState(getProxyApplication().isActive());
         checkWhitelisting();
     }
 
