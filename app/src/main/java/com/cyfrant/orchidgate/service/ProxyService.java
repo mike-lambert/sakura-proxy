@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 
+import com.cyfrant.orchidgate.MainActivity;
 import com.cyfrant.orchidgate.R;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
@@ -142,8 +143,8 @@ public class ProxyService extends Service implements ProxyStatusCallback {
                 .setContentTitle(getString(R.string.service_name))
                 .setContentText(text)
                 .setWhen(System.currentTimeMillis())
-                .setContentIntent(PendingIntent.getService(this, REQUEST_NOTIFICATION_PROXY,
-                        new Intent("stop", null, this, this.getClass()), 0)
+                .setContentIntent(PendingIntent.getActivity(this, REQUEST_NOTIFICATION_PROXY,
+                        new Intent(this, MainActivity.class), 0)
                 )
                 .build();
 
