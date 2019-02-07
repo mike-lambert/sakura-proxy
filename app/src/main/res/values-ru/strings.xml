@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Sakura</string>
+    <string name="label_switch_service">Прокси-сервер</string>
+    <string name="label_button_link">Подключить Telegram</string>
+    <string name="label_button_install">Установить Telegram</string>
+    <string name="service_name">Sakura прокси-сервер</string>
+</resources>
