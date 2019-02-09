@@ -15,10 +15,11 @@
     <string name="pref_description_boot_on_startup">Enable automatic startup while device booted</string>
 
     <!-- Placeholders -->
-    <string name="status_version_app">App version : {}</string>
-    <string name="status_version_core">Router core : {}</string>
-    <string name="status_version_os">OS          : {}</string>
-    <string name="status_level_sdk">SDK         : {}</string>
-    <string name="status_device">Device      : {}</string>
+    <string name="status_version_app">App version:{}</string>
+    <string name="status_version_core">Router core:{}</string>
+    <string name="status_version_os">OS:{}</string>
+    <string name="status_level_sdk">SDK:{}</string>
+    <string name="status_device">Device:{}</string>
+    <string name="status_no_grips">No routable addresses assigned</string>
     <string name="label_public_addresses">Assigned routable IPs</string>
 </resources>
