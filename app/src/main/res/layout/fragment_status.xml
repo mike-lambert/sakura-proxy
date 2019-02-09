@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.StatusFragment">
+    <TextView
+        android:id="@+id/statusHeartbeat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"/>
+
+
+    <Switch
+        android:id="@+id/switchEnableProxy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:text="@string/label_switch_service"
+        android:switchPadding="6dp"
+        />
+
+    <Button
+        android:id="@+id/buttonTelegramLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/switchEnableProxy"
+        android:layout_margin="10dp"
+        android:layout_marginBottom="40dp"
+        android:text="@string/label_button_link"
+        android:drawableLeft="@drawable/telegram_96px"
+        android:drawablePadding="6dp"
+        android:padding="6dp"/>
+
+    <ProgressBar
+        android:id="@+id/progressBoot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:indeterminate="true"/>
+
+    <TextView
+        android:id="@+id/statusBoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/progressBoot"/>
+
+</RelativeLayout>

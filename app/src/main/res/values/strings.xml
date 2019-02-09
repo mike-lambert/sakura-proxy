@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Sakura</string>
+    <string name="label_switch_service">Proxy</string>
+    <string name="label_button_link">Connect Telegram</string>
+    <string name="label_button_install">Install Telegram</string>
+    <string name="service_name">Sakura proxy</string>
+    <string name="title_activity_settings">Settings</string>
+    <!-- Menu-->
+    <string name="label_menu_proxy">Proxy</string>
+    <string name="label_menu_settings">Settings</string>
+    <string name="label_menu_network">Network</string>
+    <!-- Strings related to Settings -->
+    <string name="pref_header_general">General</string>
+    <string name="pref_title_boot_on_startup">Start proxy at device reboot</string>
+    <string name="pref_description_boot_on_startup">Enable automatic startup while device booted</string>
+
+    <!-- Placeholders -->
+    <string name="status_version_app">App version:{}</string>
+    <string name="status_version_core">Router core:{}</string>
+    <string name="status_version_os">OS:{}</string>
+    <string name="status_level_sdk">SDK:{}</string>
+    <string name="status_device">Device:{}</string>
+    <string name="status_no_grips">No routable addresses assigned</string>
+    <string name="label_public_addresses">Assigned routable IPs</string>
+</resources>
