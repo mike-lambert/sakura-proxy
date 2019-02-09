@@ -56,7 +56,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     private ProgressBar bootProgress;
     private TextView bootStatus;
     private TextView heartbeatStatus;
-    private TextView coreVersion;
+
     private int port;
 
     public StatusFragment() {
@@ -92,20 +92,6 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     }
 
     private void initControls(View view) {
-        coreVersion = view.findViewById(R.id.textCoreVersion);
-        coreVersion.setText(
-                "App version : " +
-                        (getPackageInfo(getActivity().getPackageName()) != null ?
-                                getPackageInfo(getActivity().getPackageName()).versionName :
-                                "<unknown>"
-                        ) +
-                        "\r\nRouter core : "
-                        + ApplicationProperties.getName()
-                        + "-" + ApplicationProperties.getVersion()
-                        + "\r\nOS          : " + Build.VERSION.RELEASE
-                        + "\r\nSDK         : " + Build.VERSION.SDK_INT
-                        + "\r\nDevice      : " + Build.MANUFACTURER + " " + Build.MODEL
-        );
         enableSwitch = view.findViewById(R.id.switchEnableProxy);
         linkButton = view.findViewById(R.id.buttonTelegramLink);
         bootProgress = view.findViewById(R.id.progressBoot);
@@ -342,14 +328,6 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
 
     private void launchProxyScheme(String link) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
-    }
-
-    private PackageInfo getPackageInfo(String packageName) {
-        try {
-            return getActivity().getPackageManager().getPackageInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }
     }
 
     private void checkWhitelisting() {

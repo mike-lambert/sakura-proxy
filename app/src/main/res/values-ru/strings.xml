@@ -6,11 +6,18 @@
     <string name="service_name">Sakura прокси-сервер</string>
     <string name="title_activity_settings">Настройки</string>
     <!-- Menu -->
-    <string name="label_menu_proxy">Состояние прокси</string>
+    <string name="label_menu_proxy">Прокси</string>
     <string name="label_menu_settings">Настройки</string>
+    <string name="label_menu_network">Сеть</string>
     <!-- Settings -->
     <string name="pref_header_general">Общие</string>
     <string name="pref_title_boot_on_startup">Запускать прокси-сервер при старте устройства</string>
     <string name="pref_description_boot_on_startup">Автоматически запускает прокси сервер, когда устройство загрузило операционную систему</string>
-
+    <!-- Placeholders -->
+    <string name="status_version_app">Версия          : {}</string>
+    <string name="status_version_core">Ядро Tor      : {}</string>
+    <string name="status_version_os">Версия ОС    : {}</string>
+    <string name="status_level_sdk">SDK                 : {}</string>
+    <string name="status_device">Устройство  : {}</string>
+    <string name="label_public_addresses">Глобальные сетевые адреса</string>
 </resources>
