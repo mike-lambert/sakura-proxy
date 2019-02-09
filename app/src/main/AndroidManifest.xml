@@ -22,7 +22,6 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -30,11 +29,20 @@
         <service
             android:name=".service.ProxyService"
             android:icon="@drawable/sakura_vector"
-            android:label="@string/service_name"></service>
+            android:label="@string/service_name">
+
+        </service>
 
         <receiver
             android:name=".service.receivers.AlarmBroadcastReceiver"
             android:enabled="true" />
+
+        <receiver android:name=".service.receivers.BootReceiver" android:exported="true" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".SettingsActivity"
