@@ -4,4 +4,14 @@
     <string name="label_button_link">Connect Telegram</string>
     <string name="label_button_install">Install Telegram</string>
     <string name="service_name">Sakura proxy</string>
+    <string name="title_activity_settings">Settings</string>
+    <!-- Menu-->
+    <string name="label_menu_proxy">Proxy status</string>
+    <string name="label_menu_settings">Settings</string>
+    <!-- Strings related to Settings -->
+    <string name="pref_header_general">General</string>
+    <string name="pref_title_boot_on_startup">Start proxy at device reboot</string>
+    <string name="pref_description_boot_on_startup">Enable automatic startup while device booted</string>
+
+
 </resources>
