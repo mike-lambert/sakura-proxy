@@ -191,7 +191,7 @@ public class ProxyService extends Service implements ProxyStatusCallback {
 
     @Override
     public void onStarted(int port) {
-        updateNotification("Listening on 127.0.0.1:" + port);
+        updateNotification(getString(R.string.status_listen).replace("{}", Integer.toString(port)));
     }
 
     @Override
@@ -204,9 +204,12 @@ public class ProxyService extends Service implements ProxyStatusCallback {
         if (wakeLock != null){
             wakeLock.acquire();
         }
-        updateNotification(exitAddress
-                + ": ⬆" + secondFormat.format(delayUp)
-                + " sec  ⬇" + secondFormat.format(delayDown) + " sec");
+        updateNotification(
+                exitAddress
+                + ": " + getString(R.string.status_delay_up).replace("{}", secondFormat.format(delayUp))
+                + " "
+                +  getString(R.string.status_delay_down).replace("{}", secondFormat.format(delayDown))
+        );
     }
 
     @Override

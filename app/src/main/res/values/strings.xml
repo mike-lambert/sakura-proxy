@@ -22,4 +22,7 @@
     <string name="status_device">Device:{}</string>
     <string name="status_no_grips">No routable addresses assigned</string>
     <string name="label_public_addresses">Assigned routable IPs</string>
+    <string name="status_delay_up"> ⬆ {} sec</string>
+    <string name="status_delay_down"> ⬇ {} sec</string>
+    <string name="status_listen">Listening on 127.0.0.1:{}</string>
 </resources>
