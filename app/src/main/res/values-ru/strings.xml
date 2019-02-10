@@ -21,4 +21,7 @@
     <string name="status_device">Устройство:{}</string>
     <string name="label_public_addresses">Глобальные сетевые адреса</string>
     <string name="status_no_grips">Глобальные адреса не присвоены</string>
+    <string name="status_delay_up"> ⬆ {} с</string>
+    <string name="status_delay_down"> ⬇ {} с</string>
+    <string name="status_listen">Сервер запущен на 127.0.0.1:{}</string>
 </resources>
