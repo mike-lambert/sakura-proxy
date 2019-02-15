@@ -34,7 +34,7 @@
         </service>
 
         <receiver
-            android:name=".service.receivers.AlarmBroadcastReceiver"
+            android:name=".service.receivers.PingTaskBroadcastReceiver"
             android:enabled="true" />
 
         <receiver android:name=".service.receivers.BootReceiver" android:exported="true" android:enabled="true">

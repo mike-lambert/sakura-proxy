@@ -1,6 +1,5 @@
 package com.cyfrant.orchidgate.service;
 
-import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,7 +9,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 
@@ -18,7 +16,6 @@ import com.cyfrant.orchidgate.MainActivity;
 import com.cyfrant.orchidgate.R;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
-import com.cyfrant.orchidgate.service.receivers.AlarmBroadcastReceiver;
 
 import java.text.DecimalFormat;
 
