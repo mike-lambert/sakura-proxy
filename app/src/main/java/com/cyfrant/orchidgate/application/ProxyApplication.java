@@ -222,7 +222,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         Intent intent = new Intent(this, UpdateTaskReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         String value = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_update_interval", "1800");
-        long interval = Long.parseLong(value);
+        long interval = (Long.parseLong(value) * 1000L);
         if (Build.VERSION.SDK_INT >= 23) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, interval, pendingIntent);
         } else if (Build.VERSION.SDK_INT >= 19) {
