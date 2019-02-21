@@ -14,7 +14,7 @@ import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.service.Background;
 import com.cyfrant.orchidgate.service.ProxyManager;
 import com.cyfrant.orchidgate.service.ProxyService;
-import com.cyfrant.orchidgate.service.receivers.PingTaskBroadcastReceiver;
+import com.cyfrant.orchidgate.service.receivers.PingTaskReceiver;
 import com.cyfrant.orchidgate.service.receivers.UpdateTaskReceiver;
 import com.subgraph.orchid.Tor;
 
@@ -204,7 +204,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
 
     public void scheduleKeepAliveAlarm() {
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, PingTaskBroadcastReceiver.class);
+        Intent intent = new Intent(this, PingTaskReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= 23) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
