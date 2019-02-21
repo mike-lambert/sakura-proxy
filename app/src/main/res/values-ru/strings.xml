@@ -17,6 +17,26 @@
     <string name="pref_header_general">Общие</string>
     <string name="pref_title_boot_on_startup">Запускать прокси-сервер при старте устройства</string>
     <string name="pref_description_boot_on_startup">Автоматически запускает прокси сервер, когда устройство загрузило операционную систему</string>
+    <string name="pref_header_updates">Автообновление</string>
+    <string name="pref_description_update_enabled">Управление автообновлением</string>
+    <string name="pref_title_update_enabled">Разрешить автообновление</string>
+    <string name="pref_description_update_interval">Установить период проверки обновлений</string>
+    <string name="pref_title_update_interval">Проверять обновления каждые</string>
+    <string-array name="array_update_interval_entries">
+        <item>10 минут</item>
+        <item>30 минут</item>
+        <item>1 час</item>
+        <item>4 часа</item>
+        <item>24 часа</item>
+    </string-array>
+    <string-array name="array_update_interval_values">
+        <item>600</item>
+        <item>1800</item>
+        <item>3600</item>
+        <item>14400</item>
+        <item>86400</item>
+    </string-array>
+
     <!-- Placeholders -->
     <string name="status_version_app">Версия:{}</string>
     <string name="status_version_core">Ядро Tor:{}</string>

@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.preference.PreferenceManager;
 
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyController;
@@ -14,13 +15,14 @@ import com.cyfrant.orchidgate.service.Background;
 import com.cyfrant.orchidgate.service.ProxyManager;
 import com.cyfrant.orchidgate.service.ProxyService;
 import com.cyfrant.orchidgate.service.receivers.PingTaskBroadcastReceiver;
+import com.cyfrant.orchidgate.service.receivers.UpdateTaskReceiver;
 import com.subgraph.orchid.Tor;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ProxyApplication extends Application implements ProxyController, ProxyStatusCallback {
-    public static int REQUEST_RECEIVER = 2;
+    public static int REQUEST_RECEIVER = 4;
     private ProxyManager proxyManager;
     private List<ProxyStatusCallback> observers;
     private boolean active;
@@ -79,6 +81,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         observers = new CopyOnWriteArrayList<>();
         proxyManager = new ProxyManager();
         Tor.setTorFaultCallback(this);
+        scheduleAutoUpdate();
     }
 
     @Override
@@ -211,6 +214,21 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         }
         else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
+        }
+    }
+
+    public void scheduleAutoUpdate() {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, UpdateTaskReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        String value = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_update_interval", "1800");
+        long interval = Long.parseLong(value);
+        if (Build.VERSION.SDK_INT >= 23) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, interval, pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= 19) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, interval, pendingIntent);
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, interval, pendingIntent);
         }
     }
 }

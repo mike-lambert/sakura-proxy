@@ -38,7 +38,9 @@
         <receiver
             android:name=".service.receivers.PingTaskBroadcastReceiver"
             android:enabled="true" />
-
+        <receiver
+            android:name=".service.receivers.UpdateTaskReceiver"
+            android:enabled="true" />
         <receiver android:name=".service.receivers.BootReceiver" android:exported="true" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
