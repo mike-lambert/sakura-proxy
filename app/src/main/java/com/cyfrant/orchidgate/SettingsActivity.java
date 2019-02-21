@@ -14,13 +14,11 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.updater.Updates;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -48,12 +46,9 @@ public class SettingsActivity extends PreferenceActivity {
             // to take immediate effect
             if (preference instanceof SwitchPreference && "setting_update_enabled".equals(preference.getKey())) {
                 boolean enabled = Boolean.parseBoolean(stringValue);
-                try {
-                    Updates.checkAndRequestInstallUpdates((ProxyApplication) preference.getContext().getApplicationContext());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.w("Settings", e);
-                }
+
+                Updates.checkAndRequestInstallUpdates((ProxyApplication) preference.getContext().getApplicationContext());
+
             }
 
             if (preference instanceof ListPreference) {
@@ -68,7 +63,7 @@ public class SettingsActivity extends PreferenceActivity {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
-            }  else {
+            } else {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
@@ -99,7 +94,7 @@ public class SettingsActivity extends PreferenceActivity {
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
-        if (preference instanceof SwitchPreference){
+        if (preference instanceof SwitchPreference) {
             sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                     PreferenceManager
                             .getDefaultSharedPreferences(preference.getContext())
@@ -167,7 +162,8 @@ public class SettingsActivity extends PreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || GeneralPreferenceFragment.class.getName().equals(fragmentName);
+                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
+                || UpdatesPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
