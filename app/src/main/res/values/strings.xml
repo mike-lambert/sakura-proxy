@@ -1,4 +1,9 @@
 <resources>
+    <!-- Updates-->
+    <string name="updates">https://cyfrant.com/sakura-proxy/updates.json</string>
+    <string name="update_title">Sakura auto-update</string>
+    <string name="update_message">Ready to install update version {}</string>
+    <!-- App -->
     <string name="app_name">Sakura</string>
     <string name="label_switch_service">Proxy</string>
     <string name="label_button_link">Connect Telegram</string>

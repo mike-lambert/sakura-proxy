@@ -1,4 +1,8 @@
 <resources>
+    <!-- Updates-->
+    <string name="update_title">Автообновление Sakura</string>
+    <string name="update_message">Версия {} готова к установке</string>
+    <!-- App -->
     <string name="app_name">Sakura</string>
     <string name="label_switch_service">Прокси-сервер</string>
     <string name="label_button_link">Подключить Telegram</string>
