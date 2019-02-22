@@ -50,4 +50,5 @@
     <string name="status_delay_up"> ⬆ {} sec</string>
     <string name="status_delay_down"> ⬇ {} sec</string>
     <string name="status_listen">Listening on 127.0.0.1:{}</string>
+    <string name="notification_storage_permission_denied">Storage permissions declined. Updates would not downloaded</string>
 </resources>
