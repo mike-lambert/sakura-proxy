@@ -23,6 +23,7 @@ import java.text.DecimalFormat;
 public class ProxyService extends Service implements ProxyStatusCallback {
     public static int REQUEST_NOTIFICATION_PROXY = 1;
     public static int REQUEST_NOTIFICATION_UPDATE = 2;
+    public static int REQUEST_NOTIFICATION_MESSAGE = 5;
 
     private static final DecimalFormat secondFormat = new DecimalFormat("#0.0");
     private ProxyManager proxyManager;

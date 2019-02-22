@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.fragment.NetworkStatusFragment;
 import com.cyfrant.orchidgate.fragment.StatusFragment;
+import com.cyfrant.orchidgate.updater.Updates;
 
 public class MainActivity extends Activity {
     private static final String KEY_SCREEN = "screen";
@@ -50,6 +51,11 @@ public class MainActivity extends Activity {
                     case R.id.menu_network:
                         screen = Screen.NetworkStatus;
                         dispatchFragment();
+                        return true;
+
+                    case R.id.menu_update:
+                        Updates.checkAndRequestInstallUpdates(getProxyApplication(), true);
+                        navigation.getMenu().findItem(R.id.menu_update).setChecked(false);
                         return true;
                 }
                 return false;

@@ -48,7 +48,7 @@ public class SettingsActivity extends PreferenceActivity {
                 boolean enabled = Boolean.parseBoolean(stringValue);
                 ProxyApplication app = (ProxyApplication) preference.getContext().getApplicationContext();
                 app.scheduleAutoUpdate();
-                Updates.checkAndRequestInstallUpdates(app);
+                Updates.checkAndRequestInstallUpdates(app, false);
 
             }
 

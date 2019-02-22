@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -61,7 +62,7 @@ public class Updates {
         return result;
     }
 
-    public static void checkAndRequestInstallUpdates(final ProxyApplication application) {
+    public static void checkAndRequestInstallUpdates(final ProxyApplication application, final boolean showFailNotification) {
         Background.threadPool().submit(new Runnable() {
             @Override
             public void run() {
@@ -75,20 +76,35 @@ public class Updates {
                             "Sakura/Update:WakeLock");
                     wakeLock.setReferenceCounted(false);
                     wakeLock.acquire();
+                    long now = System.currentTimeMillis();
+                    PreferenceManager.getDefaultSharedPreferences(application)
+                            .edit()
+                            .putLong("setting_update_last_check", now)
+                            .apply();
+
                     Update last = checkUpdates(proxy, application);
                     if (last != null) {
                         File target = getUpdateTarget(last, application);
                         UpdateValidator validator = new UpdateValidator(application, last, target);
                         String lastError = validator.validateUpdate(proxy);
+                        NotificationManager nm = ((NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE));
                         if ("".equals(lastError)) {
                             String message = application.getString(R.string.update_message)
                                     .replace("{}", Long.toString(last.getVersion()));
-                            ((NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE))
-                                    .notify(ProxyService.REQUEST_NOTIFICATION_UPDATE,
+                            nm.notify(ProxyService.REQUEST_NOTIFICATION_UPDATE,
                                             createNotification(message, application, target)
                                     );
                         } else {
-
+                            if (showFailNotification) {
+                                Notification notification = new Notification.Builder(application)
+                                        .setLargeIcon(StatusFragment.drawableToBitmap(application.getDrawable(R.drawable.sakura)))
+                                        .setSmallIcon(R.drawable.sakura)
+                                        .setContentTitle(application.getString(R.string.update_title))
+                                        .setContentText(lastError)
+                                        .setWhen(System.currentTimeMillis())
+                                        .build();
+                                nm.notify(ProxyService.REQUEST_NOTIFICATION_MESSAGE, notification);
+                            }
                         }
                     }
                 } catch (Exception e) {

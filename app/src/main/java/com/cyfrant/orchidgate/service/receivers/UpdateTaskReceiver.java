@@ -43,7 +43,7 @@ public class UpdateTaskReceiver extends WakefulBroadcastReceiver {
         app.scheduleAutoUpdate();
         if (enabled) {
             Log.d("Updates", "Scheduled updates check: " + dateFormat.format(new Date(now)));
-            Updates.checkAndRequestInstallUpdates(app);
+            Updates.checkAndRequestInstallUpdates(app, false);
         }
     }
 }

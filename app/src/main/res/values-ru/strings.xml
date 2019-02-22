@@ -13,6 +13,7 @@
     <string name="label_menu_proxy">Прокси</string>
     <string name="label_menu_settings">Настройки</string>
     <string name="label_menu_network">Сеть</string>
+    <string name="label_menu_update">Обновление</string>
     <!-- Settings -->
     <string name="pref_header_general">Общие</string>
     <string name="pref_title_boot_on_startup">Запускать прокси-сервер при старте устройства</string>
