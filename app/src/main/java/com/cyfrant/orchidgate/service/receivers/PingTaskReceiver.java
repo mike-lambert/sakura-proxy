@@ -7,7 +7,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.cyfrant.orchidgate.application.ProxyApplication;
 
-public class AlarmBroadcastReceiver extends WakefulBroadcastReceiver {
+public class PingTaskReceiver extends WakefulBroadcastReceiver {
     private PowerManager.WakeLock screenWakeLock = null;
     @Override
     public void onReceive(Context context, Intent intent) {
