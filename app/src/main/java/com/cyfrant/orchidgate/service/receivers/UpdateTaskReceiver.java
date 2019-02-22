@@ -27,7 +27,7 @@ public class UpdateTaskReceiver extends WakefulBroadcastReceiver {
                     .edit()
                     .putLong("setting_update_last_check", now)
                     .apply();
-            app.scheduleAutoUpdate();
+
         }
         if (lastCheck + interval >= now) {
             Log.d("Updates",
@@ -40,7 +40,6 @@ public class UpdateTaskReceiver extends WakefulBroadcastReceiver {
                 .edit()
                 .putLong("setting_update_last_check", now)
                 .apply();
-        app.scheduleAutoUpdate();
         if (enabled) {
             Log.d("Updates", "Scheduled updates check: " + dateFormat.format(new Date(now)));
             Updates.checkAndRequestInstallUpdates(app, false);
