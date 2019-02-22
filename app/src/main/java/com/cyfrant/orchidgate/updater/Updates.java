@@ -7,9 +7,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -123,11 +125,22 @@ public class Updates {
 
     private static Notification createNotification(String text, Application application, File apk) {
         Intent install = new Intent(Intent.ACTION_VIEW);
-        install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        Uri uri = Uri.fromFile(apk);
-        String ext = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-        String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
-        install.setDataAndType(uri, type);
+        install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri uri = FileProvider.getUriForFile(application, "com.cyfrant.orchidgate.fileProvider", apk);
+            String ext = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+            String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+            install.setDataAndType(uri, type);
+        } else {
+            Uri uri = Uri.fromFile(apk);
+            String ext = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+            String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+            install.setDataAndType(uri, type);
+        }
+
+
         Notification notification = new Notification.Builder(application)
                 .setLargeIcon(StatusFragment.drawableToBitmap(application.getDrawable(R.drawable.sakura)))
                 .setSmallIcon(R.drawable.sakura)
