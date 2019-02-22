@@ -16,6 +16,9 @@ import android.preference.SwitchPreference;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
+import com.cyfrant.orchidgate.application.ProxyApplication;
+import com.cyfrant.orchidgate.updater.Updates;
+
 import java.util.List;
 
 /**
@@ -40,6 +43,15 @@ public class SettingsActivity extends PreferenceActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
+            // to take immediate effect
+            if (preference instanceof SwitchPreference && "setting_update_enabled".equals(preference.getKey())) {
+                boolean enabled = Boolean.parseBoolean(stringValue);
+                ProxyApplication app = (ProxyApplication) preference.getContext().getApplicationContext();
+                app.scheduleAutoUpdate();
+                Updates.checkAndRequestInstallUpdates(app, false);
+
+            }
+
             if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in
                 // the preference's 'entries' list.
@@ -52,7 +64,7 @@ public class SettingsActivity extends PreferenceActivity {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
-            }  else {
+            } else {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
@@ -83,13 +95,14 @@ public class SettingsActivity extends PreferenceActivity {
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
-        if (preference instanceof SwitchPreference){
+        if (preference instanceof SwitchPreference) {
             sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                     PreferenceManager
                             .getDefaultSharedPreferences(preference.getContext())
                             .getBoolean(preference.getKey(), false));
             return;
         }
+
         // Trigger the listener immediately with the preference's
         // current value.
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
@@ -150,7 +163,8 @@ public class SettingsActivity extends PreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || GeneralPreferenceFragment.class.getName().equals(fragmentName);
+                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
+                || UpdatesPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
@@ -170,6 +184,37 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("setting_autostart"));
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * This fragment shows general preferences only. It is used when the
+     * activity is showing a two-pane settings UI.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class UpdatesPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_updates);
+            setHasOptionsMenu(true);
+
+            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // to their values. When their values change, their summaries are
+            // updated to reflect the new value, per the Android Design
+            // guidelines.
+            bindPreferenceSummaryToValue(findPreference("setting_update_enabled"));
+            bindPreferenceSummaryToValue(findPreference("setting_update_interval"));
         }
 
         @Override
