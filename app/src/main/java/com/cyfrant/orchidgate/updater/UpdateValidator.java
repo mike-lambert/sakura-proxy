@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Base64;
+import android.util.Log;
 
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.google.common.io.ByteStreams;
@@ -55,37 +56,50 @@ public class UpdateValidator {
     public String validateUpdate(Proxy proxy) {
         String message = "";
         try {
+            Log.d("Updates", "Verifying v." + reference.getVersion() + " from " + reference.getLocation());
             if (verifyUpdateSignature(reference, application)) {
+                Log.d("Updates", "v." + reference.getVersion() + " : signature OK. Downloading update package");
                 download(reference.getLocation(), apk, proxy);
+                Log.d("Updates", "v." + reference.getVersion() + " : downloaded to " + apk.getAbsolutePath());
                 if (verifyPackageSignature(apk, reference, application)) {
+                    Log.d("Updates", "v." + reference.getVersion() + " : package signature OK");
                     PackageInfo info = application.getPackageManager().getPackageArchiveInfo(apk.getAbsolutePath(), 0);
+                    Log.d("Updates", "v." + reference.getVersion() + " : acquiring package info");
                     if (info != null) {
                         String packageName = info.packageName;
-                        long versionCode = info.getLongVersionCode();
+                        Log.d("Updates", "v." + reference.getVersion() + " : " + packageName);
+                        long versionCode = info.versionCode;
+                        Log.d("Updates", "v." + reference.getVersion() + " : " + versionCode);
                         if (application.getPackageName().equalsIgnoreCase(packageName)) {
-                            long appVersion = application.getPackageManager().getPackageInfo(application.getPackageName(), 0).getLongVersionCode();
+                            long appVersion = application.getPackageManager().getPackageInfo(application.getPackageName(), 0).versionCode;
                             if (appVersion < versionCode) {
-
+                                Log.d("Updates", "v." + reference.getVersion() + " : +++ UPDATE MATCHED: " + appVersion + " < " + versionCode);
                             } else {
                                 message = "Update version " + versionCode + " elder or the same as installed: " + appVersion;
+                                Log.w("Updates", message);
                             }
                         } else {
                             message = "Downloaded package " + packageName + " mismatched intended package " + application.getPackageName();
+                            Log.w("Updates", message);
                         }
                     } else {
                         message = "Couldn't obtain downloaded package info";
+                        Log.w("Updates", message);
                     }
                 } else {
                     message = "Update package " + apk.getAbsolutePath() + " abandoned or tampered";
+                    Log.w("Updates", message);
                 }
             } else {
                 message = "Update entry (ver." + reference.getVersion() + ":"
                         + reference.getLocation() + ") signature corrupted";
+                Log.w("Updates", message);
             }
         } catch (IOException | CertificateException | NoSuchAlgorithmException | InvalidKeyException
                 | SignatureException | PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             message = e.getMessage();
+            Log.w("Updates", e);
         }
         return message;
     }

@@ -46,8 +46,9 @@ public class SettingsActivity extends PreferenceActivity {
             // to take immediate effect
             if (preference instanceof SwitchPreference && "setting_update_enabled".equals(preference.getKey())) {
                 boolean enabled = Boolean.parseBoolean(stringValue);
-
-                Updates.checkAndRequestInstallUpdates((ProxyApplication) preference.getContext().getApplicationContext());
+                ProxyApplication app = (ProxyApplication) preference.getContext().getApplicationContext();
+                app.scheduleAutoUpdate();
+                Updates.checkAndRequestInstallUpdates(app);
 
             }
 
