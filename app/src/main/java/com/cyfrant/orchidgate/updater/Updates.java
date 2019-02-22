@@ -52,12 +52,12 @@ public class Updates {
         return result;
     }
 
-    static File getUpdateTarget(Update source, Application application) {
+    static File getUpdateTarget(Update source, Application application) throws IOException {
         String name = source.getLocation();
         int lastSlash = name.lastIndexOf('/') + 1;
         name = name.substring(lastSlash).trim();
         Log.d("Update", source.getLocation() + " -> " + name);
-        File result = new File(application.getCacheDir(), name);
+        File result = new File(application.getFilesDir(), name);
         Log.d("Update", name + " -> " + result.getAbsolutePath());
         return result;
     }
