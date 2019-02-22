@@ -74,6 +74,7 @@ public class MainActivity extends Activity {
         String screenData = getIntent().getStringExtra(KEY_SCREEN);
         screen = Screen.valueOf((screenData == null ? Screen.ProxyStatus.toString() : screenData));
         restoreView();
+        Updates.checkAndRequestInstallUpdates(getProxyApplication(), false);
     }
 
     @Override

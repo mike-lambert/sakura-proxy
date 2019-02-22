@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyController;
@@ -64,7 +65,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
 
     @Override
     public void keepAlive() {
-        if (isActive()){
+        if (isActive()) {
             proxyManager.keepAlive();
         }
     }
@@ -203,16 +204,14 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     }
 
     public void scheduleKeepAliveAlarm() {
-        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent intent = new Intent(this, PingTaskReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= 23) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
-        }
-        else if (Build.VERSION.SDK_INT >= 19) {
+        } else if (Build.VERSION.SDK_INT >= 19) {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
-        }
-        else {
+        } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
         }
     }
@@ -220,15 +219,10 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     public void scheduleAutoUpdate() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent intent = new Intent(this, UpdateTaskReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, 0);
         String value = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_update_interval", "1800");
         long interval = (Long.parseLong(value) * 1000L);
-        if (Build.VERSION.SDK_INT >= 23) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, interval, pendingIntent);
-        } else if (Build.VERSION.SDK_INT >= 19) {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, interval, pendingIntent);
-        } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, interval, pendingIntent);
-        }
+        Log.d("Updates", "Scheduling update checking each " + value + " sec");
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 10000, interval, pendingIntent);
     }
 }
