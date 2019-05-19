@@ -19,6 +19,11 @@ import com.cyfrant.orchidgate.service.receivers.PingTaskReceiver;
 import com.cyfrant.orchidgate.service.receivers.UpdateTaskReceiver;
 import com.subgraph.orchid.Tor;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -82,6 +87,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         observers = new CopyOnWriteArrayList<>();
         proxyManager = new ProxyManager();
         Tor.setTorFaultCallback(this);
+        Tor.setApplication(this);
         scheduleAutoUpdate();
     }
 
@@ -224,5 +230,38 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         long interval = (Long.parseLong(value) * 1000L);
         Log.d("Updates", "Scheduling update checking each " + value + " sec");
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 10000, interval, pendingIntent);
+    }
+
+    public List<Certificate> additionalCertificates() {
+        List<Certificate> result = new CopyOnWriteArrayList<>();
+        try {
+            result.add(certificateFromAsset("DSTRootCAX3.der"));
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            result.add(certificateFromAsset("StartComCertificationAuthority.der"));
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+
+    }
+
+    private Certificate certificateFromAsset(String asset) throws CertificateException, IOException {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        InputStream in = null;
+        try {
+            in = getAssets().open(asset);
+            return cf.generateCertificate(in);
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
     }
 }

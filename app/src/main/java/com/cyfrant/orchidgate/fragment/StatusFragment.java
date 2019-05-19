@@ -1,8 +1,8 @@
 package com.cyfrant.orchidgate.fragment;
 
 
+import android.app.Fragment;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -13,7 +13,6 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -25,13 +24,11 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.cyfrant.orchidgate.MainActivity;
 import com.cyfrant.orchidgate.R;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.service.ProxyManager;
-import com.demo.ApplicationProperties;
 
 import java.text.DecimalFormat;
 

@@ -1,22 +1,27 @@
 package com.cyfrant.orchidgate.service;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.annotation.RequiresApi;
 
 import com.cyfrant.orchidgate.MainActivity;
 import com.cyfrant.orchidgate.R;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.fragment.StatusFragment;
+import com.subgraph.orchid.Tor;
 
 import java.text.DecimalFormat;
 
@@ -31,6 +36,7 @@ public class ProxyService extends Service implements ProxyStatusCallback {
     private IBinder binder;
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
+    private NotificationChannel notificationChannel;
 
     public class LocalBinder extends Binder {
         ProxyService getService() {
@@ -109,7 +115,11 @@ public class ProxyService extends Service implements ProxyStatusCallback {
     }
 
     private void startup() {
-        startForeground(REQUEST_NOTIFICATION_PROXY, createNotification("Starting proxy ..."));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForeground(REQUEST_NOTIFICATION_PROXY, createNotificationOreo("Starting proxy ..."));
+        } else {
+            startForeground(REQUEST_NOTIFICATION_PROXY, createNotification("Starting proxy ..."));
+        }
         if (wakeLock != null){
             wakeLock.release();
             wakeLock = null;
@@ -136,8 +146,40 @@ public class ProxyService extends Service implements ProxyStatusCallback {
         ((ProxyApplication)getApplication()).scheduleKeepAliveAlarm();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private Notification createNotificationOreo(String text) {
+        String NOTIFICATION_CHANNEL_ID = getApplication().getPackageName();
+        if (notificationChannel == null) {
+            String channelName = Tor.getApplication().getString(R.string.service_name);
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+            notificationChannel = chan;
+        }
+
+        Notification.Builder notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+        Notification notification = notificationBuilder
+                //.setOngoing(true)
+                .setLargeIcon(StatusFragment.drawableToBitmap(getDrawable(R.drawable.sakura)))
+                .setSmallIcon(R.drawable.sakura)
+                .setContentTitle(getString(R.string.service_name))
+                .setContentText(text)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(PendingIntent.getActivity(this, REQUEST_NOTIFICATION_PROXY,
+                        new Intent(this, MainActivity.class), 0)
+                )
+                .build();
+
+        notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        return notification;
+    }
+
     private Notification createNotification(String text) {
         Notification notification = new Notification.Builder(this)
+                //.setOngoing(true)
                 .setLargeIcon(StatusFragment.drawableToBitmap(getDrawable(R.drawable.sakura)))
                 .setSmallIcon(R.drawable.sakura)
                 .setContentTitle(getString(R.string.service_name))
@@ -161,8 +203,13 @@ public class ProxyService extends Service implements ProxyStatusCallback {
     }
 
     public void updateNotification(String text) {
-        ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
-                .notify(REQUEST_NOTIFICATION_PROXY, createNotification(text));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
+                    .notify(REQUEST_NOTIFICATION_PROXY, createNotificationOreo(text));
+        } else {
+            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
+                    .notify(REQUEST_NOTIFICATION_PROXY, createNotification(text));
+        }
     }
 
     public static ProxyServiceConnection createConnection(ProxyManager manager, ProxyApplication application) {
