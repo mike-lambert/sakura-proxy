@@ -66,7 +66,7 @@ public abstract class TorRequest {
 
     public SSLContext getSslContext() {
         if (enforceSslCertificates) {
-            return EnforceSslCertificates.getSSLContext();
+            return new EnforceSslCertificates().getSSLContext();
         } else {
             return IgnoreSslCertificates.getSSLContext();
         }

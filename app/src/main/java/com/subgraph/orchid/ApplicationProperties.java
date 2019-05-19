@@ -1,11 +1,10 @@
 package com.subgraph.orchid;
 
-import com.subgraph.orchid.http.ssl.ExportedCertificate;
 import com.subgraph.orchid.logging.SysLog;
 
 public class ApplicationProperties {
     private static final String NAME = "orchid";
-    private static final String VERSION = "cyfrant-2.1.17";
+    private static final String VERSION = "cyfrant-2.1.18";
     private static SysLog LOGGING_THRESHOLD = SysLog.INFORMATIONAL;
     private static boolean USE_COMPRESSION = false;
     private static boolean ENFORCE_SSL_CERTIFICATES = true;
@@ -23,12 +22,6 @@ public class ApplicationProperties {
             "authority longclaw orport=443 v3ident=23D15D965BC35114467363C165C4F724B64B4F66 199.58.81.140:80 74A9 1064 6BCE EFBC D2E8 74FC 1DC9 9743 0F96 8145",
             "authority bastet orport=443 v3ident=27102BC123E7AF1D4741AE047E160C91ADC76B21 ipv6=[2620:13:4000:6000::1000:118]:443 204.13.164.118:80 24E2 F139 121D 4394 C54B 5BCC 368B 3B41 1857 C413"
 
-    };
-
-    //Import common SSL certificates that are not system defaults
-    private static ExportedCertificate[] ADDITIONAL_SSL_CERTIFICATES = {
-            ExportedCertificate.getInstance("/com/subgraph/orchid/http/ssl/certificates/", "DSTRootCAX3", "der"),
-            ExportedCertificate.getInstance("/com/subgraph/orchid/http/ssl/certificates/", "StartComCertificationAuthority", "der")
     };
 
     public static String getName() {
@@ -69,13 +62,5 @@ public class ApplicationProperties {
 
     public static void setTrustedDirectoryAuthorities(String[] trustedDirectoryAuthorities) {
         TRUSTED_DIRECTORY_AUTHORITIES = trustedDirectoryAuthorities;
-    }
-
-    public static ExportedCertificate[] getAdditionalSslCertificates() {
-        return ADDITIONAL_SSL_CERTIFICATES;
-    }
-
-    public static void setAdditionalSslCertificates(ExportedCertificate[] additionalSslCertificates) {
-        ADDITIONAL_SSL_CERTIFICATES = additionalSslCertificates;
     }
 }

@@ -1,5 +1,6 @@
 package com.subgraph.orchid;
 
+import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.subgraph.orchid.circuits.CircuitManagerImpl;
 import com.subgraph.orchid.circuits.TorInitializationTracker;
 import com.subgraph.orchid.config.TorConfigImpl;
@@ -9,6 +10,7 @@ import com.subgraph.orchid.directory.downloader.DirectoryDownloaderImpl;
 import com.subgraph.orchid.logging.Logger;
 import com.subgraph.orchid.socks.SocksPortListenerImpl;
 
+import java.io.File;
 import java.nio.charset.Charset;
 
 /**
@@ -22,6 +24,7 @@ public class Tor {
 
     private static final Logger logger = Logger.getInstance(Tor.class);
     private static TorFaultCallback torFaultCallback;
+    private static ProxyApplication application;
 
     public final static int BOOTSTRAP_STATUS_STARTING = 0;
     public final static int BOOTSTRAP_STATUS_CONN_DIR = 5;
@@ -99,6 +102,23 @@ public class Tor {
             config.setHandshakeV2Enabled(false);
         }
         return config;
+    }
+
+    public static TorConfig createConfig(File dataDirectory) {
+        final TorConfig config = new TorConfigImpl(dataDirectory);
+        if (isAndroidRuntime()) {
+            logger.warn("Android Runtime detected, disabling V2 Link protocol");
+            config.setHandshakeV2Enabled(false);
+        }
+        return config;
+    }
+
+    public static ProxyApplication getApplication() {
+        return application;
+    }
+
+    public static void setApplication(ProxyApplication application) {
+        Tor.application = application;
     }
 
     static public TorInitializationTracker createInitalizationTracker() {

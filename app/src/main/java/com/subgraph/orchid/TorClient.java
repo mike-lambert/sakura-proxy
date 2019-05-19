@@ -187,12 +187,13 @@ public class TorClient {
         };
     }
 
+    /*
     public static void main(String[] args) {
         final TorClient client = new TorClient();
         client.addInitializationListener(createInitalizationListner());
         client.start();
         client.enableSocksListener();
-    }
+    }*/
 
     private static TorInitializationListener createInitalizationListner() {
         return new TorInitializationListener() {

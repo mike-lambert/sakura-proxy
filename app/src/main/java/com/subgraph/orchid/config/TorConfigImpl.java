@@ -110,6 +110,11 @@ public class TorConfigImpl implements TorConfig {
         resetDefaults();
     }
 
+    public TorConfigImpl(File dataDir) {
+        resetDefaults();
+        setDataDirectory(dataDir);
+    }
+
     @Override
     public File getDataDirectory() {
         return dataDirectory;
