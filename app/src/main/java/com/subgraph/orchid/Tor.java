@@ -98,8 +98,8 @@ public class Tor {
     static public TorConfig createConfig() {
         final TorConfig config = new TorConfigImpl();
         if (isAndroidRuntime()) {
-            logger.warn("Android Runtime detected, disabling V2 Link protocol");
-            config.setHandshakeV2Enabled(false);
+            //logger.warn("Android Runtime detected, disabling V2 Link protocol");
+            config.setHandshakeV2Enabled(true);
         }
         return config;
     }
@@ -107,8 +107,8 @@ public class Tor {
     public static TorConfig createConfig(File dataDirectory) {
         final TorConfig config = new TorConfigImpl(dataDirectory);
         if (isAndroidRuntime()) {
-            logger.warn("Android Runtime detected, disabling V2 Link protocol");
-            config.setHandshakeV2Enabled(false);
+            //logger.warn("Android Runtime detected, disabling V2 Link protocol");
+            config.setHandshakeV2Enabled(true);
         }
         return config;
     }

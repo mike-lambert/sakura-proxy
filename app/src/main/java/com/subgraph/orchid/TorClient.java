@@ -6,6 +6,7 @@ import com.subgraph.orchid.dashboard.Dashboard;
 import com.subgraph.orchid.directory.downloader.DirectoryDownloaderImpl;
 import com.subgraph.orchid.sockets.OrchidSocketFactory;
 
+import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -23,22 +24,39 @@ import javax.net.SocketFactory;
  */
 public class TorClient {
     private final static Logger logger = Logger.getLogger(TorClient.class.getName());
-    private final TorConfig config;
-    private final Directory directory;
-    private final TorInitializationTracker initializationTracker;
-    private final ConnectionCache connectionCache;
-    private final CircuitManager circuitManager;
-    private final SocksPortListener socksListener;
-    private final DirectoryDownloaderImpl directoryDownloader;
-    private final Dashboard dashboard;
+    private TorConfig config;
+    private Directory directory;
+    private TorInitializationTracker initializationTracker;
+    private ConnectionCache connectionCache;
+    private CircuitManager circuitManager;
+    private SocksPortListener socksListener;
+    private DirectoryDownloaderImpl directoryDownloader;
+    private Dashboard dashboard;
 
     private boolean isStarted = false;
     private boolean isStopped = false;
 
-    private final CountDownLatch readyLatch;
+    private CountDownLatch readyLatch;
 
     public TorClient() {
-        this(null);
+        this(Tor.getApplication().getCacheDir(), null);
+    }
+
+    public TorClient(File dataDirectory, DirectoryStore customDirectoryStore) {
+        if (Tor.isAndroidRuntime()) {
+            PRNGFixes.apply();
+        }
+        config = Tor.createConfig(dataDirectory);
+        directory = Tor.createDirectory(config, customDirectoryStore);
+        initializationTracker = Tor.createInitalizationTracker();
+        initializationTracker.addListener(createReadyFlagInitializationListener());
+        connectionCache = Tor.createConnectionCache(config, initializationTracker);
+        directoryDownloader = Tor.createDirectoryDownloader(config, initializationTracker);
+        circuitManager = Tor.createCircuitManager(config, directoryDownloader, directory, connectionCache, initializationTracker);
+        socksListener = Tor.createSocksPortListener(config, circuitManager);
+        readyLatch = new CountDownLatch(1);
+        dashboard = new Dashboard();
+        dashboard.addRenderables(circuitManager, directoryDownloader, socksListener);
     }
 
     public TorClient(DirectoryStore customDirectoryStore) {

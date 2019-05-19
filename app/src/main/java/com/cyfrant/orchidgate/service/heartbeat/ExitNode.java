@@ -1,5 +1,7 @@
 package com.cyfrant.orchidgate.service.heartbeat;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
 import com.subgraph.orchid.TorClient;
@@ -58,6 +60,7 @@ public class ExitNode {
             result.setDownlinkDelay(down);
             return result;
         } catch (Exception e) {
+            Log.w("SSL", e);
             return null;
         }
     }
