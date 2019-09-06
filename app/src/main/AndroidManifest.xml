@@ -36,12 +36,8 @@
             android:label="@string/service_name">
 
         </service>
-
         <receiver
             android:name=".service.receivers.PingTaskReceiver"
-            android:enabled="true" />
-        <receiver
-            android:name=".service.receivers.UpdateTaskReceiver"
             android:enabled="true" />
         <receiver android:name=".service.receivers.BootReceiver" android:exported="true" android:enabled="true">
             <intent-filter>

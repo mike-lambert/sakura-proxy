@@ -1,14 +1,11 @@
 package com.cyfrant.orchidgate;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -16,7 +13,6 @@ import android.widget.Toast;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.fragment.NetworkStatusFragment;
 import com.cyfrant.orchidgate.fragment.StatusFragment;
-import com.cyfrant.orchidgate.updater.Updates;
 
 public class MainActivity extends Activity {
     private static final int REQUEST_ACCESS_STORAGE = 0x00000010;
@@ -58,10 +54,6 @@ public class MainActivity extends Activity {
                         screen = Screen.NetworkStatus;
                         dispatchFragment();
                         return true;
-
-                    case R.id.menu_update:
-                        checkPermissionsAndRequestUpdates();
-                        return true;
                 }
                 return false;
             }
@@ -74,7 +66,6 @@ public class MainActivity extends Activity {
         String screenData = getIntent().getStringExtra(KEY_SCREEN);
         screen = Screen.valueOf((screenData == null ? Screen.ProxyStatus.toString() : screenData));
         restoreView();
-        Updates.checkAndRequestInstallUpdates(getProxyApplication(), false);
     }
 
     @Override
@@ -109,7 +100,6 @@ public class MainActivity extends Activity {
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    Updates.checkAndRequestInstallUpdates(getProxyApplication(), true);
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -172,18 +162,5 @@ public class MainActivity extends Activity {
             next.setChecked(false);
         }
         item.setChecked(true);
-    }
-
-    private void checkPermissionsAndRequestUpdates() {
-        if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                || PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                ) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_ACCESS_STORAGE
-            );
-        } else {
-            Updates.checkAndRequestInstallUpdates(getProxyApplication(), true);
-        }
     }
 }

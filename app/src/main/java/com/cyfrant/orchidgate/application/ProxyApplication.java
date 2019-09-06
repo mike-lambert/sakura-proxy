@@ -6,8 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyController;
@@ -16,7 +14,6 @@ import com.cyfrant.orchidgate.service.Background;
 import com.cyfrant.orchidgate.service.ProxyManager;
 import com.cyfrant.orchidgate.service.ProxyService;
 import com.cyfrant.orchidgate.service.receivers.PingTaskReceiver;
-import com.cyfrant.orchidgate.service.receivers.UpdateTaskReceiver;
 import com.subgraph.orchid.Tor;
 
 import java.io.IOException;
@@ -88,7 +85,6 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         proxyManager = new ProxyManager();
         Tor.setTorFaultCallback(this);
         Tor.setApplication(this);
-        scheduleAutoUpdate();
     }
 
     @Override
@@ -220,16 +216,6 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, 30000, pendingIntent);
         }
-    }
-
-    public void scheduleAutoUpdate() {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, UpdateTaskReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, 0);
-        String value = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_update_interval", "1800");
-        long interval = (Long.parseLong(value) * 1000L);
-        Log.d("Updates", "Scheduling update checking each " + value + " sec");
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 10000, interval, pendingIntent);
     }
 
     public List<Certificate> additionalCertificates() {
