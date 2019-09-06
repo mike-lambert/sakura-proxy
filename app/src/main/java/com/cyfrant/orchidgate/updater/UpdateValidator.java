@@ -107,13 +107,7 @@ public class UpdateValidator {
     public static String get(String url, Proxy proxyService) {
         HttpURLConnection connection = null;
         try {
-            java.net.Proxy proxy = (proxyService == null || proxyService.getProxyPort() == -1) ?
-                    java.net.Proxy.NO_PROXY :
-                    new java.net.Proxy(
-                            java.net.Proxy.Type.SOCKS,
-                            new InetSocketAddress("127.0.0.1", proxyService.getProxyPort())
-                    );
-            connection = (HttpURLConnection) new URL(url).openConnection(proxy);
+            connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setDoOutput(false);
             connection.setChunkedStreamingMode(0);
             ByteArrayOutputStream out = new ByteArrayOutputStream();

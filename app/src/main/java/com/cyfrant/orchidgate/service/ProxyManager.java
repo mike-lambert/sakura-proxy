@@ -1,5 +1,6 @@
 package com.cyfrant.orchidgate.service;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.cyfrant.orchidgate.contract.Proxy;
@@ -12,8 +13,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.net.SocketFactory;
 
 public class ProxyManager implements Proxy {
     public static final int PROXY_SOCKS5_PORT = 3128;
@@ -92,6 +91,9 @@ public class ProxyManager implements Proxy {
 
     private void scheduleHeartbeat() {
         cancelHeartbeat();
+        if (Build.VERSION.SDK_INT >= 26) {
+            return;
+        }
         pingTask = Background.threadPool().submit(new Runnable() {
             private final Object lock = new Object();
 
@@ -113,6 +115,9 @@ public class ProxyManager implements Proxy {
     }
 
     private void performHeartbeat() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            return;
+        }
         Background.threadPool().submit(new Runnable() {
             @Override
             public void run() {

@@ -7,12 +7,13 @@ import com.google.common.io.ByteStreams;
 import com.subgraph.orchid.TorClient;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 public class ExitNode {
     private String address;
@@ -53,7 +54,7 @@ public class ExitNode {
             Ping response = json.readValue(responseJson, Ping.class);
             long down = Math.abs(received - response.getServerReturned());
             long up = Math.abs(response.getServerReceived() - response.getClientSent());
-            String ip  = response.getClientAddress();
+            String ip = response.getClientAddress();
             ExitNode result = new ExitNode();
             result.setAddress(ip);
             result.setUplinkDelay(up);
@@ -65,40 +66,30 @@ public class ExitNode {
         }
     }
 
-    /*
-    public static String get(String url, TorClient client) {
+    public static String postJson(String url, String json, TorClient client) {
+        HttpsURLConnection connection = null;
         try {
-            return createTorWebClient(client).newCall(
-                    new Request.Builder()
-                            .url(url)
-                            .get()
-                            .build()
-            ).execute().body().string();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }*/
-
-    public static String postJson(String url, String json, TorClient client){
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) new URL(url).openConnection(new Proxy(
+            connection = (HttpsURLConnection) new URL(url).openConnection(new Proxy(
                     Proxy.Type.SOCKS,
                     new InetSocketAddress("127.0.0.1", client.getPrimarySocksPort())
             ));
+            SSLSocketFactory f = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            connection.setSSLSocketFactory(f);
             connection.setDoOutput(true);
-            connection.setChunkedStreamingMode(0);
             connection.setRequestProperty("Content-Type", "application/json");
+            connection.connect();
             OutputStream post = connection.getOutputStream();
             post.write(json.getBytes());
             post.flush();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ByteStreams.copy(connection.getInputStream(), out);
             return new String(out.toByteArray());
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 }
