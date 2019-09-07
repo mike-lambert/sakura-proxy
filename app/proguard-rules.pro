@@ -15,6 +15,10 @@
   public protected *;
 }
 
+-keep,includedescriptorclasses public class com.google.common.** {
+  public protected *;
+}
+
 -dontwarn com.google.common.**
 -dontwarn javax.**
 # Uncomment this to preserve the line number information for
