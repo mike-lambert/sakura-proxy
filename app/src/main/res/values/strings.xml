@@ -6,7 +6,7 @@
     <!-- App -->
     <string name="app_name">Sakura</string>
     <string name="label_switch_service">Proxy</string>
-    <string name="label_button_link">Connect Telegram</string>
+    <string name="label_button_link">Enable proxy</string>
     <string name="label_button_install">Install Telegram</string>
     <string name="service_name">Sakura proxy</string>
     <string name="title_activity_settings">Settings</string>

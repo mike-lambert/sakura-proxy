@@ -4,10 +4,7 @@ package com.cyfrant.orchidgate.fragment;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -34,6 +31,7 @@ import java.text.DecimalFormat;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.POWER_SERVICE;
+import static com.cyfrant.orchidgate.Util.scaleDrawable;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,6 +42,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     private static final DecimalFormat secondFormat = new DecimalFormat("#0.0");
     private static final String PACKAGE_TELEGRAM = "org.telegram.messenger";
     private static final String PACKAGE_TELEGRAMX = "org.thunderdog.challegram";
+    private static final String PACKAGE_PLUS = "org.telegram.plus";
     private static final int COLOR_LIGHT_GREEN = Color.parseColor("#FFD4FFBF");
     private static final int COLOR_LIGHT_YELLOW = Color.parseColor("#FFFFFDBF");
     private static final int COLOR_LIGHT_RED = Color.parseColor("#FFFFC6BF");
@@ -227,11 +226,12 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     }
 
     private void syncLinkButton() {
-        Drawable telegram = getAppInfo(PACKAGE_TELEGRAM);
-        Drawable telegramx = getAppInfo(PACKAGE_TELEGRAMX);
+        Drawable telegram = getApplicationIcon(PACKAGE_TELEGRAM);
+        Drawable telegramx = getApplicationIcon(PACKAGE_TELEGRAMX);
+        Drawable plusMessenger = getApplicationIcon(PACKAGE_PLUS);
         linkButton.setCompoundDrawables(getLinkIcon(), null, null, null);
 
-        if (telegram == null && telegramx == null) {
+        if (telegram == null && telegramx == null && plusMessenger == null) {
             linkButton.setText(R.string.label_button_install);
             linkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -261,30 +261,32 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
 
         Drawable tgx = getApplicationIcon(PACKAGE_TELEGRAMX);
         Drawable tg = getApplicationIcon(PACKAGE_TELEGRAM);
-        if (tgx == null && tg == null) {
+        Drawable plus = getApplicationIcon(PACKAGE_PLUS);
+        if (tgx == null && tg == null && plus == null) {
             return defaultIcon;
         }
 
-        if (tgx != null) {
+        if (tgx != null && tg == null && plus == null) {
             Drawable scaledTgx = scaleDrawable(tgx, 48);
             scaledTgx.setBounds(0, 0, 48, 48);
             return scaledTgx;
         }
 
-        if (tg != null) {
+        if (tg != null && tgx == null && plus == null) {
             Drawable scaledTg = scaleDrawable(tg, 48);
             scaledTg.setBounds(0, 0, 48, 48);
             return scaledTg;
         }
-        return defaultIcon;
-    }
 
-    private Drawable getAppInfo(String packageName) {
-        try {
-            return getActivity().getPackageManager().getApplicationIcon(packageName);
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
+        if (plus != null && tg == null && tgx == null) {
+            Drawable scaledPlus = scaleDrawable(plus, 48);
+            scaledPlus.setBounds(0, 0, 48, 48);
+            return scaledPlus;
         }
+
+        Drawable icon = scaleDrawable(getActivity().getDrawable(R.drawable.sakura), 48);
+        icon.setBounds(0, 0, 48, 48);
+        return icon;
     }
 
     private Drawable getApplicationIcon(String packageName) {
@@ -293,30 +295,6 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
-    }
-
-    public Drawable scaleDrawable(Drawable drawable, int dp) {
-        Bitmap src = drawableToBitmap(drawable);
-        BitmapDrawable d = new BitmapDrawable(Bitmap.createScaledBitmap(src, dp, dp, true));
-        return d;
-    }
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-
-        int width = drawable.getIntrinsicWidth();
-        width = width > 0 ? width : 1;
-        int height = drawable.getIntrinsicHeight();
-        height = height > 0 ? height : 1;
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
     }
 
     private void launchPlayMarket(String packageName) {
