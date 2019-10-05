@@ -44,8 +44,6 @@ import static com.cyfrant.orchidgate.Util.scaleDrawable;
 public class StatusFragment extends Fragment implements ProxyStatusCallback {
     private static final DecimalFormat secondFormat = new DecimalFormat("#0.0");
     private static final String PACKAGE_TELEGRAM = "org.telegram.messenger";
-    private static final String PACKAGE_TELEGRAMX = "org.thunderdog.challegram";
-    private static final String PACKAGE_PLUS = "org.telegram.plus";
     private static final int COLOR_LIGHT_GREEN = Color.parseColor("#FFD4FFBF");
     private static final int COLOR_LIGHT_YELLOW = Color.parseColor("#FFFFFDBF");
     private static final int COLOR_LIGHT_RED = Color.parseColor("#FFFFC6BF");
