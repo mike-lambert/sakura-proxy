@@ -4,6 +4,7 @@ package com.cyfrant.orchidgate.fragment;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -12,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +30,7 @@ import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.service.ProxyManager;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.POWER_SERVICE;
@@ -46,6 +49,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     private static final int COLOR_LIGHT_GREEN = Color.parseColor("#FFD4FFBF");
     private static final int COLOR_LIGHT_YELLOW = Color.parseColor("#FFFFFDBF");
     private static final int COLOR_LIGHT_RED = Color.parseColor("#FFFFC6BF");
+    private static final String LINK_PROBE = "tg://socks?server=127.0.0.1&port=3128";
 
     private Switch enableSwitch;
     private Button linkButton;
@@ -226,12 +230,10 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     }
 
     private void syncLinkButton() {
-        Drawable telegram = getApplicationIcon(PACKAGE_TELEGRAM);
-        Drawable telegramx = getApplicationIcon(PACKAGE_TELEGRAMX);
-        Drawable plusMessenger = getApplicationIcon(PACKAGE_PLUS);
+        List<ResolveInfo> packages = getHandlingPackages(LINK_PROBE);
         linkButton.setCompoundDrawables(getLinkIcon(), null, null, null);
 
-        if (telegram == null && telegramx == null && plusMessenger == null) {
+        if (packages.isEmpty()) {
             linkButton.setText(R.string.label_button_install);
             linkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -256,37 +258,23 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     }
 
     private Drawable getLinkIcon() {
-        Drawable defaultIcon = scaleDrawable(getActivity().getDrawable(R.drawable.google_play), 48);
-        defaultIcon.setBounds(0, 0, 48, 48);
-
-        Drawable tgx = getApplicationIcon(PACKAGE_TELEGRAMX);
-        Drawable tg = getApplicationIcon(PACKAGE_TELEGRAM);
-        Drawable plus = getApplicationIcon(PACKAGE_PLUS);
-        if (tgx == null && tg == null && plus == null) {
-            return defaultIcon;
-        }
-
-        if (tgx != null && tg == null && plus == null) {
-            Drawable scaledTgx = scaleDrawable(tgx, 48);
-            scaledTgx.setBounds(0, 0, 48, 48);
-            return scaledTgx;
-        }
-
-        if (tg != null && tgx == null && plus == null) {
-            Drawable scaledTg = scaleDrawable(tg, 48);
-            scaledTg.setBounds(0, 0, 48, 48);
-            return scaledTg;
-        }
-
-        if (plus != null && tg == null && tgx == null) {
-            Drawable scaledPlus = scaleDrawable(plus, 48);
-            scaledPlus.setBounds(0, 0, 48, 48);
-            return scaledPlus;
-        }
-
-        Drawable icon = scaleDrawable(getActivity().getDrawable(R.drawable.sakura), 48);
+        Drawable icon = scaleDrawable(getActivity().getDrawable(R.drawable.google_play), 48);
         icon.setBounds(0, 0, 48, 48);
-        return icon;
+
+        List<ResolveInfo> packages = getHandlingPackages(LINK_PROBE);
+        if (packages.isEmpty()) {
+            return icon;
+        }
+
+        if (1 == packages.size()) {
+            String target = packages.get(0).activityInfo.packageName;
+            icon = getApplicationIcon(target);
+        } else {
+            icon = scaleDrawable(getActivity().getDrawable(R.drawable.sakura), 48);
+        }
+        Drawable scaledIcon = scaleDrawable(icon, 48);
+        scaledIcon.setBounds(0, 0, 48, 48);
+        return scaledIcon;
     }
 
     private Drawable getApplicationIcon(String packageName) {
@@ -303,6 +291,16 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
 
     private void launchProxyScheme(String link) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
+    }
+
+    List<ResolveInfo> getHandlingPackages(String link) {
+        Intent target = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        List<ResolveInfo> resolveInfoList = getActivity().getPackageManager()
+                .queryIntentActivities(target, 0);
+        for (ResolveInfo info : resolveInfoList) {
+            Log.i("PM", info.activityInfo.packageName);
+        }
+        return resolveInfoList;
     }
 
     private void checkWhitelisting() {
