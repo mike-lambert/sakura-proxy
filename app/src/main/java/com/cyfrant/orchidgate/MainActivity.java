@@ -2,20 +2,17 @@ package com.cyfrant.orchidgate;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.fragment.NetworkStatusFragment;
 import com.cyfrant.orchidgate.fragment.StatusFragment;
 
 public class MainActivity extends Activity {
-    private static final int REQUEST_ACCESS_STORAGE = 0x00000010;
     private static final String KEY_SCREEN = "screen";
     private enum Screen {
         ProxyStatus,
@@ -87,27 +84,6 @@ public class MainActivity extends Activity {
         String data = savedInstanceState.getString(KEY_SCREEN, Screen.ProxyStatus.toString());
         screen = Screen.valueOf(data);
         getIntent().putExtra(KEY_SCREEN, data);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_ACCESS_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length == 2
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Toast.makeText(this, R.string.notification_storage_permission_denied, Toast.LENGTH_LONG).show();
-                }
-                return;
-            }
-        }
     }
 
     private void startSettingsActivity() {
