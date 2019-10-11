@@ -82,7 +82,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     public void onCreate() {
         super.onCreate();
         observers = new CopyOnWriteArrayList<>();
-        proxyManager = new ProxyManager();
+        proxyManager = new ProxyManager(this);
         Tor.setTorFaultCallback(this);
         Tor.setApplication(this);
     }

@@ -6,5 +6,11 @@
         android:summary="@string/pref_description_boot_on_startup"
         android:title="@string/pref_title_boot_on_startup" />
 
-
+    <EditTextPreference
+        android:defaultValue="3128"
+        android:key="setting_port_socks"
+        android:numeric="integer"
+        android:inputType="number"
+        android:summary="@string/pref_description_port_socks"
+        android:title="@string/pref_title_port_socks" />
 </PreferenceScreen>
