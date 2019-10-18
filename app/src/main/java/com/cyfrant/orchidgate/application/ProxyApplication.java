@@ -16,6 +16,8 @@ import com.cyfrant.orchidgate.service.ProxyService;
 import com.cyfrant.orchidgate.service.receivers.PingTaskReceiver;
 import com.subgraph.orchid.Tor;
 
+import org.torproject.android.service.util.Prefs;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.Certificate;
@@ -85,6 +87,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         proxyManager = new ProxyManager(this);
         Tor.setTorFaultCallback(this);
         Tor.setApplication(this);
+        Prefs.setContext(this);
     }
 
     @Override

@@ -13,4 +13,14 @@
         android:inputType="number"
         android:summary="@string/pref_description_port_socks"
         android:title="@string/pref_title_port_socks" />
+
+    <ListPreference
+        android:key="setting_engine"
+        android:defaultValue="orchid"
+        android:summary="@string/pref_description_engine"
+        android:title="@string/pref_title_engine"
+        android:entries="@array/pref_engines_titles"
+        android:entryValues="@array/pref_engines_values">
+
+    </ListPreference>
 </PreferenceScreen>

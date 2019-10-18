@@ -16,6 +16,16 @@
     <string name="pref_description_boot_on_startup">Enable automatic startup while device booted</string>
     <string name="pref_title_port_socks">Open SOCKS5 listener at port</string>
     <string name="pref_description_port_socks">Designates SOCKS5 port number</string>
+    <string name="pref_title_engine">Tor engine</string>
+    <string name="pref_description_engine">Choose preferred method to access Tor</string>
+    <string-array name="pref_engines_titles">
+        <item>Internal (Orchid)</item>
+        <item>Add-on (Tor executable)</item>
+    </string-array>
+    <string-array name="pref_engines_values">
+        <item>orchid</item>
+        <item>tor</item>
+    </string-array>
 
     <!-- Placeholders -->
     <string name="status_version_app">App version:{}</string>

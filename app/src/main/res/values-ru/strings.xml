@@ -16,7 +16,12 @@
     <string name="pref_description_boot_on_startup">Автоматически запускает прокси сервер, когда устройство загрузило операционную систему</string>
     <string name="pref_title_port_socks">Номер порта SOCKS5 сервера</string>
     <string name="pref_description_port_socks">Назначает номер порта, на котором сервер SOCKS5 слушает запросы</string>
-
+    <string name="pref_title_engine">Движок Tor</string>
+    <string name="pref_description_engine">Выберите предпочитаемый способ доступа к сети Tor</string>
+    <string-array name="pref_engines_titles">
+        <item>Встроенный (Orchid)</item>
+        <item>Внешний (Tor binary)</item>
+    </string-array>
     <!-- Placeholders -->
     <string name="status_version_app">Версия:{}</string>
     <string name="status_version_core">Ядро Tor:{}</string>

@@ -13,6 +13,7 @@ import com.cyfrant.orchidgate.fragment.NetworkStatusFragment;
 import com.cyfrant.orchidgate.fragment.StatusFragment;
 
 public class MainActivity extends Activity {
+    public final static String INTENT_ACTION_REQUEST_START_TOR = "org.torproject.android.START_TOR";
     private static final String KEY_SCREEN = "screen";
     private enum Screen {
         ProxyStatus,
@@ -139,4 +140,5 @@ public class MainActivity extends Activity {
         }
         item.setChecked(true);
     }
+
 }

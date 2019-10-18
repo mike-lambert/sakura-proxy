@@ -28,7 +28,15 @@
         <service
             android:name=".service.ProxyService"
             android:icon="@drawable/sakura_vector"
-            android:label="@string/service_name">
+            android:label="@string/service_name"
+            android:enabled="true"></service>
+        <service
+            android:name="org.torproject.android.service.TorService"
+            android:icon="@drawable/sakura_vector"
+            android:label="@string/service_name"
+            android:enabled="true"
+            android:exported="true">
+
         </service>
         <receiver
             android:name=".service.receivers.PingTaskReceiver"

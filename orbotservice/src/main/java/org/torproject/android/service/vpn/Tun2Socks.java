@@ -19,20 +19,15 @@ package org.torproject.android.service.vpn;
  *
  */
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
 import org.torproject.android.service.util.TCPSourceApp;
 
 import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
-
-import static android.content.Context.CONNECTIVITY_SERVICE;
 
 public class Tun2Socks
 {
@@ -134,11 +129,11 @@ public class Tun2Socks
 
     public static boolean checkIsAllowed (int protocol, String sourceAddr, int sourcePort, String destAddr, int destPort) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
         {
             return isAllowedQ(protocol, sourceAddr, sourcePort, destAddr, destPort);
         }
-        else
+        else*/
             return isAllowed(protocol, sourceAddr, sourcePort, destAddr, destPort);
     }
 
@@ -154,6 +149,7 @@ public class Tun2Socks
             return true;
     }
 
+    /*
     @TargetApi(Build.VERSION_CODES.Q)
     public static boolean isAllowedQ (int protocol, String sourceAddr, int sourcePort, String destAddr, int destPort) {
         ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(CONNECTIVITY_SERVICE);
@@ -165,7 +161,7 @@ public class Tun2Socks
 
         int uid = cm.getConnectionOwnerUid(protocol, local, remote);
         return mAppUidBlacklist.containsKey(uid);
-    }
+    }*/
 
     public static void setBlacklist(HashMap<Integer,String> appUidBlacklist)
     {
