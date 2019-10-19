@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Sakura</string>
+    <string name="status_starting_up">Sakura sedang dimulai…</string>
+  <string name="status_activated">Tersambung ke Jaringan Tor</string>
+  <string name="status_disabled">Sakura telah dibatalkan</string>
+  <string name="status_shutting_down">Sakura sedang dimatikan</string>
+    <!--Welcome Wizard strings (DJH)-->
+    <!--END Welcome Wizard strings (DJH)-->
+    <!--New Wizard Strings-->
+  <!--Title Screen-->
+  <!--Warning screen-->
+    <!--Permissions screen-->
+  <!--TipsAndTricks screen-->
+  <!--Transparent Proxy screen-->
+</resources>

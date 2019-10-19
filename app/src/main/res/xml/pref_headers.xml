@@ -6,9 +6,4 @@
         android:fragment="com.cyfrant.orchidgate.SettingsActivity$GeneralPreferenceFragment"
         android:icon="@drawable/ic_info_black_24dp"
         android:title="@string/pref_header_general" />
-
-    <header
-        android:fragment="com.cyfrant.orchidgate.SettingsActivity$UpdatesPreferenceFragment"
-        android:icon="@drawable/ic_sync_black_24dp"
-        android:title="@string/pref_header_updates" />
 </preference-headers>

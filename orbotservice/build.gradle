@@ -1,0 +1,63 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['./src/main/libs']
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 16111000
+        versionName '16.1.1-BETA-2-tor-0.4.1-5-rc-orbotservice'
+        archivesBaseName = "OrbotService-$versionName"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    aaptOptions {
+        cruncherEnabled = false
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    packagingOptions {
+        exclude 'assets/arm/obfs4proxy' //this is redundant
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            // Tells Gradle to put outputs from external native
+            // builds in the path specified below.
+            //buildStagingDirectory "./outputs/ndk-build"
+            path "src/main/jni/Android.mk"
+        }
+    }
+}
+
+dependencies {
+
+    implementation 'org.torproject:tor-android-binary:0.4.1.5-rc'
+    implementation 'info.pluggabletransports.aptds:apt-dispatch-library:1.0.7'
+    implementation 'info.pluggabletransports.aptds:apt-meek-obfs4-legacy:1.0.7'
+    implementation 'info.pluggabletransports.aptds:jsocksAndroid:1.0.4'
+
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.jaredrummler:android-shell:1.0.0'
+    implementation fileTree(dir: 'libs', include: ['.so'])
+    testImplementation 'junit:junit:4.12'
+
+    implementation 'com.offbynull.portmapper:portmapper:2.0.5'
+}

@@ -20,10 +20,11 @@ import com.cyfrant.orchidgate.MainActivity;
 import com.cyfrant.orchidgate.R;
 import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
-import com.cyfrant.orchidgate.fragment.StatusFragment;
 import com.subgraph.orchid.Tor;
 
 import java.text.DecimalFormat;
+
+import static com.cyfrant.orchidgate.Util.drawableToBitmap;
 
 public class ProxyService extends Service implements ProxyStatusCallback {
     public static int REQUEST_NOTIFICATION_PROXY = 1;
@@ -163,7 +164,7 @@ public class ProxyService extends Service implements ProxyStatusCallback {
         Notification.Builder notificationBuilder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
         Notification notification = notificationBuilder
                 //.setOngoing(true)
-                .setLargeIcon(StatusFragment.drawableToBitmap(getDrawable(R.drawable.sakura)))
+                .setLargeIcon(drawableToBitmap(getDrawable(R.drawable.sakura)))
                 .setSmallIcon(R.drawable.sakura)
                 .setContentTitle(getString(R.string.service_name))
                 .setContentText(text)
@@ -180,7 +181,7 @@ public class ProxyService extends Service implements ProxyStatusCallback {
     private Notification createNotification(String text) {
         Notification notification = new Notification.Builder(this)
                 //.setOngoing(true)
-                .setLargeIcon(StatusFragment.drawableToBitmap(getDrawable(R.drawable.sakura)))
+                .setLargeIcon(drawableToBitmap(getDrawable(R.drawable.sakura)))
                 .setSmallIcon(R.drawable.sakura)
                 .setContentTitle(getString(R.string.service_name))
                 .setContentText(text)
@@ -257,6 +258,19 @@ public class ProxyService extends Service implements ProxyStatusCallback {
                 + " "
                 +  getString(R.string.status_delay_down).replace("{}", secondFormat.format(delayDown))
         );
+    }
+
+    @Override
+    public void onTorStatus(String status) {
+
+    }
+
+    @Override
+    public int getSocksPort() {
+        if (proxyManager != null) {
+            return proxyManager.getProxyPort();
+        }
+        return 0;
     }
 
     @Override

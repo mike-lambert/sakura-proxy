@@ -6,14 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- <uses-permission android:name="android.permission.BIND_VPN_SERVICE"/> -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".application.ProxyApplication"
@@ -33,15 +28,18 @@
         <service
             android:name=".service.ProxyService"
             android:icon="@drawable/sakura_vector"
-            android:label="@string/service_name">
+            android:label="@string/service_name"
+            android:enabled="true"></service>
+        <service
+            android:name="org.torproject.android.service.TorService"
+            android:icon="@drawable/sakura_vector"
+            android:label="@string/service_name"
+            android:enabled="true"
+            android:exported="true">
 
         </service>
-
         <receiver
             android:name=".service.receivers.PingTaskReceiver"
-            android:enabled="true" />
-        <receiver
-            android:name=".service.receivers.UpdateTaskReceiver"
             android:enabled="true" />
         <receiver android:name=".service.receivers.BootReceiver" android:exported="true" android:enabled="true">
             <intent-filter>
@@ -49,7 +47,6 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>
-
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -58,15 +55,5 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.cyfrant.orchidgate.MainActivity" />
         </activity>
-
-        <provider
-            android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.cyfrant.orchidgate.fileProvider"
-            android:grantUriPermissions="true"
-            android:exported="false">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
-        </provider>
     </application>
 </manifest>

@@ -26,43 +26,6 @@ public class TorClientFactory {
     public static void openTunnel() {
         if (!isRunning) {
             isStarting = true;
-            if (TorCryptography.hasRestrictedCryptography()) {
-                TorCryptography.removeCryptographyRestrictions();
-            }
-//            
-//            TrustedAuthorities.getInstance().getAuthorityServers().clear();
-//            try{
-//                TrustedAuthorities ta = TrustedAuthorities.getInstance();
-//            Method method = ta.getClass().getDeclaredMethod("initialize");
-//            method.setAccessible(true);
-//Object r = method.invoke(ta);
-//            } catch(Exception e){
-//              System.out.println(e);  
-//            }
-//            List<DirectoryServer> activeAuthority = new ArrayList();
-//            for(DirectoryServer ds: TrustedAuthorities.getInstance().getAuthorityServers()){
-//                System.out.println(ds.getNickname());
-//                if(!ds.getNickname().equals("Tonga") && !ds.getNickname().equals("urras")){
-//                    activeAuthority.add(ds);
-//                }
-//            }
-//            TrustedAuthorities.getInstance().getAuthorityServers().clear();
-//            TrustedAuthorities.getInstance().getAuthorityServers().addAll(activeAuthority);
-//            
-//            
-//            try{
-//                Field f = TrustedAuthorities.class.getDeclaredField("v3ServerCount");
-//                f.setAccessible(true);
-//                int n = 0;
-//                for(DirectoryServer ds: TrustedAuthorities.getInstance().getAuthorityServers()) {
-//                    if(ds.getV3Identity() != null) {
-//                        n += 1;
-//                    }
-//                }
-//                f.set(TrustedAuthorities.getInstance(), n);
-//            } catch(Exception e){
-//                System.out.println(e);
-//            }
             client = new TorClient();
             client.enableSocksListener(PROXY_PORT);
             client.addInitializationListener(createInitalizationListner());

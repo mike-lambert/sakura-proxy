@@ -1,7 +1,5 @@
 package com.cyfrant.orchidgate.contract;
 
-import javax.net.SocketFactory;
-
 public interface Proxy {
     int getProxyPort();
     boolean isStartPending();

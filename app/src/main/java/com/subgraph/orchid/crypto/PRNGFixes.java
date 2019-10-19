@@ -37,7 +37,6 @@ import java.security.Security;
 public final class PRNGFixes {
     private static final Logger logger = Logger.getInstance(PRNGFixes.class);
 
-    private static final int VERSION_CODE_JELLY_BEAN = 16;
     private static final int VERSION_CODE_JELLY_BEAN_MR2 = 18;
     private static final byte[] BUILD_FINGERPRINT_AND_DEVICE_SERIAL =
             getBuildFingerprintAndDeviceSerial();
@@ -54,43 +53,7 @@ public final class PRNGFixes {
      * @throws SecurityException if a fix is needed but could not be applied.
      */
     public static void apply() {
-        applyOpenSSLFix();
         installLinuxPRNGSecureRandom();
-    }
-
-    /**
-     * Applies the fix for OpenSSL PRNG having low entropy. Does nothing if the
-     * fix is not needed.
-     *
-     * @throws SecurityException if the fix is needed but could not be applied.
-     */
-    private static void applyOpenSSLFix() throws SecurityException {
-        int sdkVersion = getSdkVersion();
-        if ((sdkVersion < VERSION_CODE_JELLY_BEAN)
-                || (sdkVersion > VERSION_CODE_JELLY_BEAN_MR2)) {
-            // No need to apply the fix
-            return;
-        }
-
-        try {
-            // Mix in the device- and invocation-specific seed.
-            Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
-                    .getMethod("RAND_seed", byte[].class)
-                    .invoke(null, generateSeed());
-
-            // Mix output of Linux PRNG into OpenSSL's PRNG
-            int bytesRead = (Integer) Class.forName(
-                    "org.apache.harmony.xnet.provider.jsse.NativeCrypto")
-                    .getMethod("RAND_load_file", String.class, long.class)
-                    .invoke(null, "/dev/urandom", 1024);
-            if (bytesRead != 1024) {
-                throw new IOException(
-                        "Unexpected number of bytes read from Linux PRNG: "
-                                + bytesRead);
-            }
-        } catch (Exception e) {
-            throw new SecurityException("Failed to seed OpenSSL PRNG", e);
-        }
     }
 
     /**

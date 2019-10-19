@@ -10,3 +10,7 @@
 /captures
 .externalNativeBuild
 /signing.properties
+*.apk
+tme2tg
+updates.json
+sign_updates_feed
