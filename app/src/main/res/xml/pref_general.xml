@@ -16,7 +16,7 @@
 
     <ListPreference
         android:key="setting_engine"
-        android:defaultValue="orchid"
+        android:defaultValue="tor"
         android:summary="@string/pref_description_engine"
         android:title="@string/pref_title_engine"
         android:entries="@array/pref_engines_titles"

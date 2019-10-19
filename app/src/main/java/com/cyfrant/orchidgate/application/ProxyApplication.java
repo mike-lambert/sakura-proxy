@@ -50,8 +50,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     @Override
     public void startProxyService() {
         active = true;
-        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
-        boolean useTor = engine.equalsIgnoreCase("tor");
+        boolean useTor = isTorServiceUsed();
         if (useTor) {
             startTor();
         } else {
@@ -60,24 +59,26 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         }
     }
 
+    private boolean isTorServiceUsed() {
+        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "tor");
+        return engine.equalsIgnoreCase("tor");
+    }
+
     @Override
     public boolean isProxyRunning() {
-        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
-        boolean useTor = engine.equalsIgnoreCase("tor");
+        boolean useTor = isTorServiceUsed();
         return proxyManager != null || (useTor && STATUS_ON.equals(torStatus));
     }
 
     @Override
     public boolean isProxyStarting() {
-        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
-        boolean useTor = engine.equalsIgnoreCase("tor");
+        boolean useTor = isTorServiceUsed();
         return (getProxy() != null && getProxy().isStartPending()) || (useTor && STATUS_STARTING.equals(torStatus));
     }
 
     @Override
     public void stopProxyService() {
-        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
-        boolean useTor = engine.equalsIgnoreCase("tor");
+        boolean useTor = isTorServiceUsed();
         if (useTor) {
             stopTor();
         } else {
