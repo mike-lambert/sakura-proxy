@@ -1,3 +1,4 @@
+import com.android.build.OutputFile
 apply plugin: 'com.android.application'
 
 def keystorePropertiesFile = rootProject.file("signing.properties")
@@ -46,8 +47,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             applicationVariants.all { variant ->
-                variant.outputs.all {
-                    outputFileName = "${variant.applicationId}-${variant.name}-${variant.versionName}.apk"
+                variant.outputs.all { output ->
+                    def abiName = output.getFilter(OutputFile.ABI)
+                    if (abiName == null) {
+                        abiName = "universal-"
+                    } else {
+                        abiName = abiName + "-"
+                    }
+                    outputFileName = "${variant.applicationId}-${variant.name}-${abiName}${variant.versionName}.apk"
                 }
             }
             signingConfig signingConfigs.config
@@ -57,6 +64,17 @@ android {
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            // Specifies a list of ABIs that Gradle should create APKs for.
+            include "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
+            // Specifies that we want to also generate a universal APK that includes all ABIs.
+            universalApk true
+        }
     }
 }
 
