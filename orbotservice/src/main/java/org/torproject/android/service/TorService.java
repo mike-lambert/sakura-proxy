@@ -158,7 +158,7 @@ public class TorService extends Service implements TorServiceConstants, OrbotCon
             if (mLastProcessId != -1 && conn != null) {
                 sendCallbackLogMessage(getString(R.string.found_existing_tor_process));
                 sendCallbackStatus(STATUS_ON);
-                showToolbarNotification(getString(R.string.status_activated), NOTIFY_ID, R.drawable.ic_stat_tor);
+                showToolbarNotification(getString(R.string.status_activated), NOTIFY_ID, R.drawable.sakura);
 
                 return true;
             }
@@ -226,7 +226,7 @@ public class TorService extends Service implements TorServiceConstants, OrbotCon
             if (mNotifyBuilder == null) {
                 mNotifyBuilder = new NotificationCompat.Builder(this)
                         .setContentTitle(getString(R.string.app_name))
-                        .setSmallIcon(R.drawable.ic_stat_tor);
+                        .setSmallIcon(R.drawable.sakura);
 
                 mNotifyBuilder.setContentIntent(pendIntent);
 
@@ -280,7 +280,7 @@ public class TorService extends Service implements TorServiceConstants, OrbotCon
      */
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        showToolbarNotification("", NOTIFY_ID, R.drawable.ic_stat_tor);
+        showToolbarNotification("", NOTIFY_ID, R.drawable.sakura);
 
         if (intent != null)
             exec(new IncomingIntentRouter(intent));
@@ -731,7 +731,7 @@ public class TorService extends Service implements TorServiceConstants, OrbotCon
             logNotice("checking binary version: " + version);
 
             sendCallbackStatus(STATUS_STARTING);
-            showToolbarNotification(getString(R.string.status_starting_up), NOTIFY_ID, R.drawable.ic_stat_tor);
+            showToolbarNotification(getString(R.string.status_starting_up), NOTIFY_ID, R.drawable.sakura);
             //sendCallbackLogMessage(getString(R.string.status_starting_up));
             //logNotice(getString(R.string.status_starting_up));
 
@@ -1094,7 +1094,7 @@ public class TorService extends Service implements TorServiceConstants, OrbotCon
                     try {
 
 
-                        int iconId = R.drawable.ic_stat_tor;
+                        int iconId = R.drawable.sakura;
 
                         if (hasConnectivity() && Prefs.expandedNotifications())
                             showToolbarNotification(getString(R.string.newnym), getNotifyId(), iconId);
