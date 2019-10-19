@@ -139,6 +139,9 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 heartbeatStatus.setVisibility(View.VISIBLE);
 
                 bootStatus.setText(message);
+                syncState(getProxyApplication().isActive(),
+                        getProxyApplication().isProxyStarting()
+                );
             }
         });
     }
@@ -199,6 +202,9 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 heartbeatStatus.setVisibility(View.VISIBLE);
 
                 bootStatus.setText(status);
+                syncState(getProxyApplication().isActive(),
+                        getProxyApplication().isProxyStarting()
+                );
             }
         });
     }
@@ -215,6 +221,9 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
             public void run() {
                 heartbeatStatus.setText(message);
                 heartbeatStatus.setBackgroundColor(COLOR_LIGHT_RED);
+                syncState(false,
+                        false
+                );
             }
         });
     }
