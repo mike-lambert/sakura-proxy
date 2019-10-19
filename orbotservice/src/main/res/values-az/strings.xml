@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-  <string name="app_description">Pulsuz proksi tətbiqetməsi olan Orbot başqa tətbiqetmələrə internetdən daha təhlükəsiz istifadə etmək imkanı verir. Orbot sizin internet trafikinizi şifrələmək üçün Tordan istifadə edir və dünyanın hər yerində kompüterlərin birindən o birinə sıçramaqla bunu gizlədir. Tor pulsuz proqram təminatıdır, eyni zamanda sizin şəxsi azadlığınız və təhlükəsizliyinizə, gizli biznes fəaliyyəti və əlaqələrə, o cümlədən trafik analiz adlanan dövlət təhlükəsizliyinə xələl gətirə biləcək şəbəkə nəzarəti formalarından müdafiə olunmağa yardım edən açıq şəbəkədir.</string>
-    <string name="status_starting_up">Orbot başlayır...</string>
+  <string name="app_name">Sakura</string>
+  <string name="app_description">Pulsuz proksi tətbiqetməsi olan Sakura başqa tətbiqetmələrə internetdən daha təhlükəsiz istifadə etmək imkanı verir. Sakura sizin internet trafikinizi şifrələmək üçün Tordan istifadə edir və dünyanın hər yerində kompüterlərin birindən o birinə sıçramaqla bunu gizlədir. Tor pulsuz proqram təminatıdır, eyni zamanda sizin şəxsi azadlığınız və təhlükəsizliyinizə, gizli biznes fəaliyyəti və əlaqələrə, o cümlədən trafik analiz adlanan dövlət təhlükəsizliyinə xələl gətirə biləcək şəbəkə nəzarəti formalarından müdafiə olunmağa yardım edən açıq şəbəkədir.</string>
+    <string name="status_starting_up">Sakura başlayır...</string>
   <string name="status_activated">Tor şəbəkəsinə bağlandı</string>
-  <string name="status_disabled">Orbot deaktivasiya edildi</string>
+  <string name="status_disabled">Sakura deaktivasiya edildi</string>
   <string name="status_shutting_down">Tor xidməti işini başa vurur</string>
   <string name="tor_process_starting">Tor xidməti başlayır...</string>
   <string name="tor_process_complete">tamamla.</string>

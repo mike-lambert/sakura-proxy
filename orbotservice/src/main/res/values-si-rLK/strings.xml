@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-    <string name="status_starting_up">Orbot ආරම්භ කරමින්…</string>
+  <string name="app_name">Sakura</string>
+    <string name="status_starting_up">Sakura ආරම්භ කරමින්…</string>
   <string name="status_activated">Tor ජාලයට සබැදියි</string>
-  <string name="status_disabled">Orbot ක්‍රියාවිරහිත කර ඇත </string>
+  <string name="status_disabled">Sakura ක්‍රියාවිරහිත කර ඇත </string>
   <string name="tor_process_starting">Tor දායකයා ආරම්භ කරමින්...</string>
   <string name="tor_process_complete">සම්පුර්ණයි.</string>
     <!--Welcome Wizard strings (DJH)-->

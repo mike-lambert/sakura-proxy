@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-    <string name="status_starting_up">Orbot abiarazten ari da...</string>
+  <string name="app_name">Sakura</string>
+    <string name="status_starting_up">Sakura abiarazten ari da...</string>
   <string name="status_activated">Tor sarera konektatuta</string>
-  <string name="status_disabled">\"Orbot desaktibatuta dago</string>
+  <string name="status_disabled">\"Sakura desaktibatuta dago</string>
   <string name="tor_process_starting">Tor bezeroa hasten...</string>
   <string name="tor_process_complete">eginda.</string>
     <!--Welcome Wizard strings (DJH)-->

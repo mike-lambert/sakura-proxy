@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-    <string name="status_starting_up">Orbot štartuje…</string>
+  <string name="app_name">Sakura</string>
+    <string name="status_starting_up">Sakura štartuje…</string>
   <string name="status_activated">Pripojený do Tor siete</string>
-  <string name="status_disabled">Orbot je deaktivovaný</string>
+  <string name="status_disabled">Sakura je deaktivovaný</string>
   <string name="tor_process_starting">Štartujem Tor klienta...</string>
   <string name="tor_process_complete">hotovo.</string>
     <!--Welcome Wizard strings (DJH)-->

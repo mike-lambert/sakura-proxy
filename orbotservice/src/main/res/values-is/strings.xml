@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-  <string name="app_description">Orbot er ókeypis proxy smáforrit sem gerir öðrum smáforritum kleift að nota veraldarvefinn á öruggari hátt. Orbot notar Tor til að dulkóða umferð þína á netinu og felur hana svo með að hoppa í gegnum fjölda tölva um allan heim. Tor er ókeypis hugbúnaður og opið net sem aðstoðar þig við að verjast gegn eftirliti á netinu sem vinnur gegn frelsi einkalífsins og friðhelgi, trúnaðar viðskiptamálum og samböndum, og ríkisöryggi þekkt sem umferðargreining.</string>
-    <string name="status_starting_up">Orbot er að ræsa...</string>
+  <string name="app_name">Sakura</string>
+  <string name="app_description">Sakura er ókeypis proxy smáforrit sem gerir öðrum smáforritum kleift að nota veraldarvefinn á öruggari hátt. Sakura notar Tor til að dulkóða umferð þína á netinu og felur hana svo með að hoppa í gegnum fjölda tölva um allan heim. Tor er ókeypis hugbúnaður og opið net sem aðstoðar þig við að verjast gegn eftirliti á netinu sem vinnur gegn frelsi einkalífsins og friðhelgi, trúnaðar viðskiptamálum og samböndum, og ríkisöryggi þekkt sem umferðargreining.</string>
+    <string name="status_starting_up">Sakura er að ræsa...</string>
   <string name="status_activated">Tengdur við Tor netið</string>
-  <string name="status_disabled">Orbot er slökkt</string>
+  <string name="status_disabled">Sakura er slökkt</string>
   <string name="tor_process_starting">Kveiki á Tor notanda...</string>
   <string name="tor_process_complete">lokið.</string>
     <!--Welcome Wizard strings (DJH)-->

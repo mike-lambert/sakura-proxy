@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-    <string name="status_starting_up">L\'Orbot s\'està iniciant...</string>
+  <string name="app_name">Sakura</string>
+    <string name="status_starting_up">L\'Sakura s\'està iniciant...</string>
   <string name="status_activated">Esteu connectat a la xarxa Tor</string>
-  <string name="status_disabled">L\'Orbot està desactivat</string>
+  <string name="status_disabled">L\'Sakura està desactivat</string>
   <string name="tor_process_starting">S\'està iniciant el client Tor...</string>
   <string name="tor_process_complete">fet.</string>
     <!--Welcome Wizard strings (DJH)-->

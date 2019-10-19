@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-    <string name="status_starting_up">Orbot ishga tushirilmoqda…</string>
+  <string name="app_name">Sakura</string>
+    <string name="status_starting_up">Sakura ishga tushirilmoqda…</string>
   <string name="status_activated">Tor tarmog\'iga ulangan</string>
     <!--Welcome Wizard strings (DJH)-->
     <!--END Welcome Wizard strings (DJH)-->

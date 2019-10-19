@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-  <string name="app_description">Orbot on ilmainen välityspalvelinsovellus, joka tarjoaa muille sovelluksille mahdollisuuden käyttää internetiä turvallisemmin. Orbot käyttää Toria kryptaamaan verkkoliikenteesi ja sitten piilottaa sen kierrättämällä sitä usean tietokoneen kautta ympäri maailman. Tor on vapaa ohjelmisto ja avoin verkosto, jotka auttavat puolustautumaan vapautta ja yksityisyyttä uhkaavalta verkkovalvonnalta ja valtioiden verkonseurannalta sekä suojaamaan salaisia liiketoimintoja ja -yhteyksiä.</string>
-    <string name="status_starting_up">Orbot käynnistyy...</string>
+  <string name="app_name">Sakura</string>
+  <string name="app_description">Sakura on ilmainen välityspalvelinsovellus, joka tarjoaa muille sovelluksille mahdollisuuden käyttää internetiä turvallisemmin. Sakura käyttää Toria kryptaamaan verkkoliikenteesi ja sitten piilottaa sen kierrättämällä sitä usean tietokoneen kautta ympäri maailman. Tor on vapaa ohjelmisto ja avoin verkosto, jotka auttavat puolustautumaan vapautta ja yksityisyyttä uhkaavalta verkkovalvonnalta ja valtioiden verkonseurannalta sekä suojaamaan salaisia liiketoimintoja ja -yhteyksiä.</string>
+    <string name="status_starting_up">Sakura käynnistyy...</string>
   <string name="status_activated">Yhdistetty Tor-verkkoon</string>
-  <string name="status_disabled">Orbot on poistettu käytöstä</string>
+  <string name="status_disabled">Sakura on poistettu käytöstä</string>
   <string name="tor_process_starting">Käynnistetään Tor-ohjelmaa...</string>
   <string name="tor_process_complete">valmis.</string>
     <!--Welcome Wizard strings (DJH)-->

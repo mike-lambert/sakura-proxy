@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Orbot</string>
-  <string name="app_description">Orbot è un\'applicazione proxy che permette alle altre applicazioni di accedere a internet in maniera più sicura. Orbot usa Tor per cifrare il  traffico internet e lo nasconde poi facendolo rimbalzare attraverso una serie di computer attorno al mondo. Tor è un software libero e una rete aperta che aiuta a difendersi da una forma di sorveglianza della rete conosciuta come analisi del traffico. Quest\'ultima minaccia libertà e privacy personale, attività commerciali riservate, rapporti interpersonali, e persino la sicurezza di stato.</string>
-    <string name="status_starting_up">Orbot è in esecuzione...</string>
+  <string name="app_name">Sakura</string>
+  <string name="app_description">Sakura è un\'applicazione proxy che permette alle altre applicazioni di accedere a internet in maniera più sicura. Sakura usa Tor per cifrare il  traffico internet e lo nasconde poi facendolo rimbalzare attraverso una serie di computer attorno al mondo. Tor è un software libero e una rete aperta che aiuta a difendersi da una forma di sorveglianza della rete conosciuta come analisi del traffico. Quest\'ultima minaccia libertà e privacy personale, attività commerciali riservate, rapporti interpersonali, e persino la sicurezza di stato.</string>
+    <string name="status_starting_up">Sakura è in esecuzione...</string>
   <string name="status_activated">Connesso alla rete Tor</string>
-  <string name="status_disabled">\"Orbot è disattivato</string>
+  <string name="status_disabled">\"Sakura è disattivato</string>
   <string name="status_shutting_down">TorService si sta spegnendo</string>
   <string name="tor_process_starting">Avvio client Tor...</string>
   <string name="tor_process_complete">completa.</string>
