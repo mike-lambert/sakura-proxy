@@ -29,6 +29,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -548,7 +549,8 @@ public class TorService extends Service implements TorServiceConstants, OrbotCon
         //       extraLines.append("RunAsDaemon 1").append('\n');
         //       extraLines.append("AvoidDiskWrites 1").append('\n');
 
-        String socksPortPref = prefs.getString(OrbotConstants.PREF_SOCKS, (TorServiceConstants.SOCKS_PROXY_PORT_DEFAULT));
+        String socksPortPref = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString("setting_port_socks", "3128");
+        //prefs.getString("setting_port_socks", (TorServiceConstants.SOCKS_PROXY_PORT_DEFAULT));
 
         if (socksPortPref.indexOf(':') != -1)
             socksPortPref = socksPortPref.split(":")[1];
