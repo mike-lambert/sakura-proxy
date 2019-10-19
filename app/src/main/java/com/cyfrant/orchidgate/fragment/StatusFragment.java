@@ -3,7 +3,6 @@ package com.cyfrant.orchidgate.fragment;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
@@ -13,9 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,10 +28,6 @@ import com.cyfrant.orchidgate.application.ProxyApplication;
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.service.ProxyManager;
-import com.cyfrant.orchidgate.service.receivers.TorCallbackReceiver;
-
-import org.torproject.android.service.TorService;
-import org.torproject.android.service.TorServiceConstants;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -61,7 +54,6 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     private ProgressBar bootProgress;
     private TextView bootStatus;
     private TextView heartbeatStatus;
-    private TorCallbackReceiver mLocalBroadcastReceiver;
 
     private int port;
 
@@ -82,19 +74,6 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
         if (getArguments() != null) {
 
         }
-        mLocalBroadcastReceiver = new TorCallbackReceiver(this);
-        /* receive the internal status broadcasts, which are separate from the public
-         * status broadcasts to prevent other apps from sending fake/wrong status
-         * info to this app */
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
-        lbm.registerReceiver(mLocalBroadcastReceiver,
-                new IntentFilter(TorServiceConstants.ACTION_STATUS));
-        lbm.registerReceiver(mLocalBroadcastReceiver,
-                new IntentFilter(TorServiceConstants.LOCAL_ACTION_BANDWIDTH));
-        lbm.registerReceiver(mLocalBroadcastReceiver,
-                new IntentFilter(TorServiceConstants.LOCAL_ACTION_LOG));
-        lbm.registerReceiver(mLocalBroadcastReceiver,
-                new IntentFilter(TorServiceConstants.LOCAL_ACTION_PORTS));
     }
 
     @Override
@@ -111,8 +90,6 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     }
 
     private void initControls(View view) {
-        String engine = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("setting_engine", "orchid");
-        boolean useTor = engine.equalsIgnoreCase("tor");
         enableSwitch = view.findViewById(R.id.switchEnableProxy);
         linkButton = view.findViewById(R.id.buttonTelegramLink);
         bootProgress = view.findViewById(R.id.progressBoot);
@@ -122,19 +99,11 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    if (useTor) {
-                        startTor();
-                    } else {
-                        getProxyApplication().getProxyController().startProxyService();
-                    }
+                    getProxyApplication().getProxyController().startProxyService();
                     heartbeatStatus.setText("");
                     heartbeatStatus.setBackgroundColor(Color.WHITE);
                 } else {
-                    if (useTor) {
-                        stopTor();
-                    } else {
-                        getProxyApplication().getProxyController().stopProxyService();
-                    }
+                    getProxyApplication().getProxyController().stopProxyService();
                     linkButton.setVisibility(View.GONE);
                     heartbeatStatus.setText("");
                     heartbeatStatus.setBackgroundColor(Color.WHITE);
@@ -154,8 +123,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
         super.onResume();
         getProxyApplication().addProxyObserver(this);
         syncState(getProxyApplication().isActive(),
-                getProxyApplication().getProxy() != null &&
-                        getProxyApplication().getProxy().isStartPending()
+                getProxyApplication().isProxyStarting()
         );
         checkWhitelisting();
     }
@@ -169,9 +137,8 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 bootStatus.setVisibility(View.VISIBLE);
                 bootProgress.setVisibility(View.VISIBLE);
                 heartbeatStatus.setVisibility(View.VISIBLE);
-                linkButton.setVisibility(View.GONE);
 
-                bootStatus.setText(percentage + "% : " + message);
+                bootStatus.setText(message);
             }
         });
     }
@@ -182,14 +149,13 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
             @Override
             public void run() {
                 StatusFragment.this.port = port;
-                bootStatus.setVisibility(View.GONE);
-                bootProgress.setVisibility(View.GONE);
                 heartbeatStatus.setVisibility(View.VISIBLE);
                 linkButton.setVisibility(View.VISIBLE);
                 enableSwitch.setChecked(true);
 
                 heartbeatStatus.setText("Listening on 127.0.0.1:" + port);
                 syncLinkButton();
+                syncState(true, false);
             }
         });
     }
@@ -205,6 +171,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 enableSwitch.setChecked(false);
 
                 heartbeatStatus.setText(cause);
+                syncState(false, false);
             }
         });
     }
@@ -220,6 +187,25 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 setHeartbeatBackground(delayDown + delayUp);
             }
         });
+    }
+
+    @Override
+    public void onTorStatus(String status) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                bootStatus.setVisibility(View.VISIBLE);
+                bootProgress.setVisibility(View.VISIBLE);
+                heartbeatStatus.setVisibility(View.VISIBLE);
+
+                bootStatus.setText(status);
+            }
+        });
+    }
+
+    @Override
+    public int getSocksPort() {
+        return port;
     }
 
     @Override
@@ -240,7 +226,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
         heartbeatStatus.setVisibility(View.VISIBLE);
         bootStatus.setVisibility(starting ? View.VISIBLE : View.GONE);
         bootProgress.setVisibility(starting ? View.VISIBLE : View.GONE);
-        port = (getProxyApplication().getProxyController().getProxy() != null ? getProxyApplication().getProxyController().getProxy().getProxyPort() : 0);
+        port = getProxyApplication().getSocksPort();
         syncLinkButton();
     }
 
@@ -281,7 +267,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 if (proxy == null) {
                     return;
                 }
-                launchProxyScheme(ProxyManager.makeTelegramLink(proxy.getProxyPort()));
+                launchProxyScheme(ProxyManager.makeTelegramLink(port));
             }
         });
     }
@@ -356,45 +342,5 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
             }
 
         }
-    }
-
-    // OrBot copypaste
-    private void sendIntentToService(final String action) {
-        Intent torService = //new Intent();
-                new Intent(getActivity(), TorService.class);
-        //torService.setClassName("org.torproject.android.service", TorService.class.getName());
-        torService.setAction(action);
-        getActivity().startService(torService);
-    }
-
-    private void requestTorRereadConfig() {
-        sendIntentToService(TorServiceConstants.CMD_SIGNAL_HUP);
-    }
-
-    public void stopVpnService() {
-        sendIntentToService(TorServiceConstants.CMD_VPN_CLEAR);
-    }
-
-    /**
-     * Starts tor and related daemons by sending an
-     * {@link TorServiceConstants#ACTION_START} {@link Intent} to
-     * {@link TorService}
-     */
-    private void startTor() {
-        sendIntentToService(TorServiceConstants.ACTION_START);
-    }
-
-    private void stopTor() {
-        Intent torService = new Intent(getActivity(), TorService.class);
-        getActivity().stopService(torService);
-    }
-
-    /**
-     * Request tor status without starting it
-     * {@link TorServiceConstants#ACTION_START} {@link Intent} to
-     * {@link TorService}
-     */
-    private void requestTorStatus() {
-        sendIntentToService(TorServiceConstants.ACTION_STATUS);
     }
 }

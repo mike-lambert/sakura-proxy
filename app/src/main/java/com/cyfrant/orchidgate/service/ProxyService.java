@@ -261,6 +261,19 @@ public class ProxyService extends Service implements ProxyStatusCallback {
     }
 
     @Override
+    public void onTorStatus(String status) {
+
+    }
+
+    @Override
+    public int getSocksPort() {
+        if (proxyManager != null) {
+            return proxyManager.getProxyPort();
+        }
+        return 0;
+    }
+
+    @Override
     public void onTorBootstrapFailed(String message) {
         updateNotification(message);
     }

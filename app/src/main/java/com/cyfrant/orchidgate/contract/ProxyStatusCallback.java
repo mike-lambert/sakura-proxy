@@ -7,4 +7,6 @@ public interface ProxyStatusCallback extends Tor.TorFaultCallback {
     void onStarted(int port);
     void onStopped(String cause);
     void onHeartbeat(double delayUp, double delayDown, String exitAddress);
+    void onTorStatus(String status);
+    int getSocksPort();
 }
