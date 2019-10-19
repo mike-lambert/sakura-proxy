@@ -4,10 +4,8 @@ package com.cyfrant.orchidgate.fragment;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -15,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,9 +30,11 @@ import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
 import com.cyfrant.orchidgate.service.ProxyManager;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.POWER_SERVICE;
+import static com.cyfrant.orchidgate.Util.scaleDrawable;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,10 +44,10 @@ import static android.content.Context.POWER_SERVICE;
 public class StatusFragment extends Fragment implements ProxyStatusCallback {
     private static final DecimalFormat secondFormat = new DecimalFormat("#0.0");
     private static final String PACKAGE_TELEGRAM = "org.telegram.messenger";
-    private static final String PACKAGE_TELEGRAMX = "org.thunderdog.challegram";
     private static final int COLOR_LIGHT_GREEN = Color.parseColor("#FFD4FFBF");
     private static final int COLOR_LIGHT_YELLOW = Color.parseColor("#FFFFFDBF");
     private static final int COLOR_LIGHT_RED = Color.parseColor("#FFFFC6BF");
+    private static final String LINK_PROBE = "tg://socks?server=127.0.0.1&port=3128";
 
     private Switch enableSwitch;
     private Button linkButton;
@@ -122,8 +123,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
         super.onResume();
         getProxyApplication().addProxyObserver(this);
         syncState(getProxyApplication().isActive(),
-                getProxyApplication().getProxy() != null &&
-                        getProxyApplication().getProxy().isStartPending()
+                getProxyApplication().isProxyStarting()
         );
         checkWhitelisting();
     }
@@ -137,9 +137,8 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 bootStatus.setVisibility(View.VISIBLE);
                 bootProgress.setVisibility(View.VISIBLE);
                 heartbeatStatus.setVisibility(View.VISIBLE);
-                linkButton.setVisibility(View.GONE);
 
-                bootStatus.setText(percentage + "% : " + message);
+                bootStatus.setText(message);
             }
         });
     }
@@ -150,14 +149,13 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
             @Override
             public void run() {
                 StatusFragment.this.port = port;
-                bootStatus.setVisibility(View.GONE);
-                bootProgress.setVisibility(View.GONE);
                 heartbeatStatus.setVisibility(View.VISIBLE);
                 linkButton.setVisibility(View.VISIBLE);
                 enableSwitch.setChecked(true);
 
                 heartbeatStatus.setText("Listening on 127.0.0.1:" + port);
                 syncLinkButton();
+                syncState(true, false);
             }
         });
     }
@@ -173,6 +171,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 enableSwitch.setChecked(false);
 
                 heartbeatStatus.setText(cause);
+                syncState(false, false);
             }
         });
     }
@@ -188,6 +187,25 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 setHeartbeatBackground(delayDown + delayUp);
             }
         });
+    }
+
+    @Override
+    public void onTorStatus(String status) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                bootStatus.setVisibility(View.VISIBLE);
+                bootProgress.setVisibility(View.VISIBLE);
+                heartbeatStatus.setVisibility(View.VISIBLE);
+
+                bootStatus.setText(status);
+            }
+        });
+    }
+
+    @Override
+    public int getSocksPort() {
+        return port;
     }
 
     @Override
@@ -208,7 +226,7 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
         heartbeatStatus.setVisibility(View.VISIBLE);
         bootStatus.setVisibility(starting ? View.VISIBLE : View.GONE);
         bootProgress.setVisibility(starting ? View.VISIBLE : View.GONE);
-        port = (getProxyApplication().getProxyController().getProxy() != null ? getProxyApplication().getProxyController().getProxy().getProxyPort() : 0);
+        port = getProxyApplication().getSocksPort();
         syncLinkButton();
     }
 
@@ -227,11 +245,10 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
     }
 
     private void syncLinkButton() {
-        Drawable telegram = getAppInfo(PACKAGE_TELEGRAM);
-        Drawable telegramx = getAppInfo(PACKAGE_TELEGRAMX);
+        List<ResolveInfo> packages = getHandlingPackages(LINK_PROBE);
         linkButton.setCompoundDrawables(getLinkIcon(), null, null, null);
 
-        if (telegram == null && telegramx == null) {
+        if (packages.isEmpty()) {
             linkButton.setText(R.string.label_button_install);
             linkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -250,41 +267,29 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
                 if (proxy == null) {
                     return;
                 }
-                launchProxyScheme(ProxyManager.makeTelegramLink(proxy.getProxyPort()));
+                launchProxyScheme(ProxyManager.makeTelegramLink(port));
             }
         });
     }
 
     private Drawable getLinkIcon() {
-        Drawable defaultIcon = scaleDrawable(getActivity().getDrawable(R.drawable.google_play), 48);
-        defaultIcon.setBounds(0, 0, 48, 48);
+        Drawable icon = scaleDrawable(getActivity().getDrawable(R.drawable.google_play), 48);
+        icon.setBounds(0, 0, 48, 48);
 
-        Drawable tgx = getApplicationIcon(PACKAGE_TELEGRAMX);
-        Drawable tg = getApplicationIcon(PACKAGE_TELEGRAM);
-        if (tgx == null && tg == null) {
-            return defaultIcon;
+        List<ResolveInfo> packages = getHandlingPackages(LINK_PROBE);
+        if (packages.isEmpty()) {
+            return icon;
         }
 
-        if (tgx != null) {
-            Drawable scaledTgx = scaleDrawable(tgx, 48);
-            scaledTgx.setBounds(0, 0, 48, 48);
-            return scaledTgx;
+        if (1 == packages.size()) {
+            String target = packages.get(0).activityInfo.packageName;
+            icon = getApplicationIcon(target);
+        } else {
+            icon = scaleDrawable(getActivity().getDrawable(R.drawable.sakura), 48);
         }
-
-        if (tg != null) {
-            Drawable scaledTg = scaleDrawable(tg, 48);
-            scaledTg.setBounds(0, 0, 48, 48);
-            return scaledTg;
-        }
-        return defaultIcon;
-    }
-
-    private Drawable getAppInfo(String packageName) {
-        try {
-            return getActivity().getPackageManager().getApplicationIcon(packageName);
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }
+        Drawable scaledIcon = scaleDrawable(icon, 48);
+        scaledIcon.setBounds(0, 0, 48, 48);
+        return scaledIcon;
     }
 
     private Drawable getApplicationIcon(String packageName) {
@@ -295,36 +300,22 @@ public class StatusFragment extends Fragment implements ProxyStatusCallback {
         }
     }
 
-    public Drawable scaleDrawable(Drawable drawable, int dp) {
-        Bitmap src = drawableToBitmap(drawable);
-        BitmapDrawable d = new BitmapDrawable(Bitmap.createScaledBitmap(src, dp, dp, true));
-        return d;
-    }
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-
-        int width = drawable.getIntrinsicWidth();
-        width = width > 0 ? width : 1;
-        int height = drawable.getIntrinsicHeight();
-        height = height > 0 ? height : 1;
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
-    }
-
     private void launchPlayMarket(String packageName) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName)));
     }
 
     private void launchProxyScheme(String link) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
+    }
+
+    List<ResolveInfo> getHandlingPackages(String link) {
+        Intent target = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        List<ResolveInfo> resolveInfoList = getActivity().getPackageManager()
+                .queryIntentActivities(target, 0);
+        for (ResolveInfo info : resolveInfoList) {
+            Log.i("PM", info.activityInfo.packageName);
+        }
+        return resolveInfoList;
     }
 
     private void checkWhitelisting() {

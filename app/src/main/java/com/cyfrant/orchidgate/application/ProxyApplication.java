@@ -5,9 +5,10 @@ import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyController;
@@ -16,8 +17,12 @@ import com.cyfrant.orchidgate.service.Background;
 import com.cyfrant.orchidgate.service.ProxyManager;
 import com.cyfrant.orchidgate.service.ProxyService;
 import com.cyfrant.orchidgate.service.receivers.PingTaskReceiver;
-import com.cyfrant.orchidgate.service.receivers.UpdateTaskReceiver;
+import com.cyfrant.orchidgate.service.receivers.TorCallbackReceiver;
 import com.subgraph.orchid.Tor;
+
+import org.torproject.android.service.TorService;
+import org.torproject.android.service.TorServiceConstants;
+import org.torproject.android.service.util.Prefs;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,38 +32,64 @@ import java.security.cert.CertificateFactory;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.torproject.android.service.TorServiceConstants.STATUS_ON;
+import static org.torproject.android.service.TorServiceConstants.STATUS_STARTING;
+
 public class ProxyApplication extends Application implements ProxyController, ProxyStatusCallback {
     public static int REQUEST_RECEIVER = 4;
     private ProxyManager proxyManager;
     private List<ProxyStatusCallback> observers;
     private boolean active;
     protected boolean mIsBound;
+    protected String torStatus;
     protected ProxyService.ProxyServiceConnection mConnection;
+    protected TorCallbackReceiver receiver;
+    protected int torPort;
 
     // ProxyController
     @Override
     public void startProxyService() {
         active = true;
-        instantiateProxyService();
-        proxyManager.proxyStart(this);
+        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
+        boolean useTor = engine.equalsIgnoreCase("tor");
+        if (useTor) {
+            startTor();
+        } else {
+            instantiateProxyService();
+            proxyManager.proxyStart(this);
+        }
     }
 
     @Override
     public boolean isProxyRunning() {
-        return proxyManager != null && proxyManager.connectProbe();
+        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
+        boolean useTor = engine.equalsIgnoreCase("tor");
+        return proxyManager != null || (useTor && STATUS_ON.equals(torStatus));
+    }
+
+    @Override
+    public boolean isProxyStarting() {
+        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
+        boolean useTor = engine.equalsIgnoreCase("tor");
+        return (getProxy() != null && getProxy().isStartPending()) || (useTor && STATUS_STARTING.equals(torStatus));
     }
 
     @Override
     public void stopProxyService() {
+        String engine = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_engine", "orchid");
+        boolean useTor = engine.equalsIgnoreCase("tor");
+        if (useTor) {
+            stopTor();
+        } else {
+            ProxyService svc = mConnection.getService();
+            if (svc != null) {
+                svc.shutdown();
+                doUnbindService();
+            }
 
-        ProxyService svc = mConnection.getService();
-        if (svc != null) {
-            svc.shutdown();
-            doUnbindService();
-        }
-
-        if (isActive()) {
-            proxyManager.proxyStop();
+            if (isActive()) {
+                proxyManager.proxyStop();
+            }
         }
         active = false;
     }
@@ -85,10 +116,20 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     public void onCreate() {
         super.onCreate();
         observers = new CopyOnWriteArrayList<>();
-        proxyManager = new ProxyManager();
+        proxyManager = new ProxyManager(this);
+        receiver = new TorCallbackReceiver(this);
         Tor.setTorFaultCallback(this);
         Tor.setApplication(this);
-        scheduleAutoUpdate();
+        Prefs.setContext(this);
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        lbm.registerReceiver(receiver,
+                new IntentFilter(TorServiceConstants.ACTION_STATUS));
+        lbm.registerReceiver(receiver,
+                new IntentFilter(TorServiceConstants.LOCAL_ACTION_BANDWIDTH));
+        lbm.registerReceiver(receiver,
+                new IntentFilter(TorServiceConstants.LOCAL_ACTION_LOG));
+        lbm.registerReceiver(receiver,
+                new IntentFilter(TorServiceConstants.LOCAL_ACTION_PORTS));
     }
 
     @Override
@@ -113,6 +154,7 @@ public class ProxyApplication extends Application implements ProxyController, Pr
 
     @Override
     public void onStarted(final int port) {
+        this.torPort = port;
         for (final ProxyStatusCallback observer : observers) {
             Background.threadPool().submit(new Runnable() {
                 @Override
@@ -145,6 +187,16 @@ public class ProxyApplication extends Application implements ProxyController, Pr
                 }
             });
         }
+    }
+
+    @Override
+    public void onTorStatus(String status) {
+        torStatus = status;
+    }
+
+    @Override
+    public int getSocksPort() {
+        return torPort;
     }
 
     // internal
@@ -222,16 +274,6 @@ public class ProxyApplication extends Application implements ProxyController, Pr
         }
     }
 
-    public void scheduleAutoUpdate() {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, UpdateTaskReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_RECEIVER, intent, 0);
-        String value = PreferenceManager.getDefaultSharedPreferences(this).getString("setting_update_interval", "1800");
-        long interval = (Long.parseLong(value) * 1000L);
-        Log.d("Updates", "Scheduling update checking each " + value + " sec");
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 10000, interval, pendingIntent);
-    }
-
     public List<Certificate> additionalCertificates() {
         List<Certificate> result = new CopyOnWriteArrayList<>();
         try {
@@ -263,5 +305,44 @@ public class ProxyApplication extends Application implements ProxyController, Pr
                 in.close();
             }
         }
+    }
+
+    // OrBot copypaste
+    private void sendIntentToService(final String action) {
+        Intent torService = new Intent(this, TorService.class);
+        //torService.setClassName("org.torproject.android.service", TorService.class.getName());
+        torService.setAction(action);
+        startService(torService);
+    }
+
+    private void requestTorRereadConfig() {
+        sendIntentToService(TorServiceConstants.CMD_SIGNAL_HUP);
+    }
+
+    public void stopVpnService() {
+        sendIntentToService(TorServiceConstants.CMD_VPN_CLEAR);
+    }
+
+    /**
+     * Starts tor and related daemons by sending an
+     * {@link TorServiceConstants#ACTION_START} {@link Intent} to
+     * {@link TorService}
+     */
+    private void startTor() {
+        sendIntentToService(TorServiceConstants.ACTION_START);
+    }
+
+    private void stopTor() {
+        Intent torService = new Intent(this, TorService.class);
+        stopService(torService);
+    }
+
+    /**
+     * Request tor status without starting it
+     * {@link TorServiceConstants#ACTION_START} {@link Intent} to
+     * {@link TorService}
+     */
+    private void requestTorStatus() {
+        sendIntentToService(TorServiceConstants.ACTION_STATUS);
     }
 }

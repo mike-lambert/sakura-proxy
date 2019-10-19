@@ -1,11 +1,11 @@
 package com.cyfrant.orchidgate.service;
 
-import android.os.Build;
+import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.cyfrant.orchidgate.contract.Proxy;
 import com.cyfrant.orchidgate.contract.ProxyStatusCallback;
-import com.cyfrant.orchidgate.service.heartbeat.ExitNode;
 import com.subgraph.orchid.TorClient;
 import com.subgraph.orchid.TorInitializationListener;
 
@@ -20,6 +20,11 @@ public class ProxyManager implements Proxy {
     private ProxyStatusCallback callback = null;
     private Future pingTask = null;
     private final AtomicBoolean starting = new AtomicBoolean(false);
+    private final Context context;
+
+    public ProxyManager(Context context) {
+        this.context = context;
+    }
 
     private void startRouter() {
         if (client != null) {
@@ -53,15 +58,23 @@ public class ProxyManager implements Proxy {
                     public void run() {
                         if (callback != null) {
                             callback.onStarted(client.getPrimarySocksPort());
-                            scheduleHeartbeat();
                         }
                     }
                 });
             }
         });
         client.disableDashboard();
-        client.enableSocksListener(PROXY_SOCKS5_PORT);
+        client.enableSocksListener(getPortSettings());
         client.start();
+    }
+
+    private int getPortSettings() {
+        try {
+            String pval = PreferenceManager.getDefaultSharedPreferences(context).getString("setting_port_socks", "3128");
+            return Integer.parseInt(pval);
+        } catch (Exception e) {
+            return PROXY_SOCKS5_PORT;
+        }
     }
 
     private void stopRouter() {
@@ -76,59 +89,7 @@ public class ProxyManager implements Proxy {
                     callback.onStopped("Stopped by user");
                 }
                 ProxyManager.this.callback = null;
-                cancelHeartbeat();
                 starting.set(false);
-            }
-        });
-    }
-
-    private void cancelHeartbeat() {
-        if (pingTask != null && !pingTask.isCancelled()) {
-            pingTask.cancel(true);
-            pingTask = null;
-        }
-    }
-
-    private void scheduleHeartbeat() {
-        cancelHeartbeat();
-        if (Build.VERSION.SDK_INT >= 26) {
-            return;
-        }
-        pingTask = Background.threadPool().submit(new Runnable() {
-            private final Object lock = new Object();
-
-            @Override
-            public void run() {
-                while (!Thread.currentThread().isInterrupted()) {
-                    synchronized (lock) {
-                        try {
-                            performHeartbeat();
-                            lock.wait(15000);
-                        } catch (InterruptedException e) {
-                            Log.w("Heartbeat", e);
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    private void performHeartbeat() {
-        if (Build.VERSION.SDK_INT >= 26) {
-            return;
-        }
-        Background.threadPool().submit(new Runnable() {
-            @Override
-            public void run() {
-                ExitNode node = ExitNode.probe(client);
-                if (callback != null && node != null) {
-                    callback.onHeartbeat(
-                            node.getUplinkDelay() / 1000.0d,
-                            node.getDownlinkDelay() / 1000.0d,
-                            node.getAddress()
-                    );
-                }
             }
         });
     }
@@ -157,7 +118,6 @@ public class ProxyManager implements Proxy {
     @Override
     public void keepAlive() {
         if (client != null) {
-            performHeartbeat();
             portGuard();
         }
     }

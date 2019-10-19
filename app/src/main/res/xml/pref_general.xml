@@ -6,5 +6,21 @@
         android:summary="@string/pref_description_boot_on_startup"
         android:title="@string/pref_title_boot_on_startup" />
 
+    <EditTextPreference
+        android:defaultValue="3128"
+        android:key="setting_port_socks"
+        android:numeric="integer"
+        android:inputType="number"
+        android:summary="@string/pref_description_port_socks"
+        android:title="@string/pref_title_port_socks" />
 
+    <ListPreference
+        android:key="setting_engine"
+        android:defaultValue="orchid"
+        android:summary="@string/pref_description_engine"
+        android:title="@string/pref_title_engine"
+        android:entries="@array/pref_engines_titles"
+        android:entryValues="@array/pref_engines_values">
+
+    </ListPreference>
 </PreferenceScreen>
