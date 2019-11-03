@@ -193,6 +193,14 @@ public class ProxyApplication extends Application implements ProxyController, Pr
     @Override
     public void onTorStatus(String status) {
         torStatus = status;
+        for (final ProxyStatusCallback observer : observers) {
+            Background.threadPool().submit(new Runnable() {
+                @Override
+                public void run() {
+                    observer.onTorStatus(status);
+                }
+            });
+        }
     }
 
     @Override
